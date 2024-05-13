@@ -27,6 +27,7 @@ services:
       - DB_PASSWORD=$POSTGRESDB_ROOT_PASSWORD
       - DB_NAME=$POSTGRESDB_DATABASE
       - DB_PORT=$POSTGRESDB_DOCKER_PORT
+      - JWT_SECRET=$JWT_SECRET
     stdin_open: true
     tty: true
 
