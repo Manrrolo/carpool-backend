@@ -41,3 +41,9 @@ NODE_LOCAL_PORT=6868
 NODE_DOCKER_PORT=8080
 JWT_SECRET=carpool_db_secret
 ```
+
+### Linter
+Para correr el linter utiliza el siguiente comando en /carpool-app:
+```bash
+npx eslint .
+```
