@@ -2,9 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const process = require('process');
 require('dotenv').config();
+
 const app = express();
 
-var corsOptions = {
+const corsOptions = {
   origin: 'http://localhost:8081',
 };
 
@@ -19,11 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 const db = require('./app/models');
 
 const Role = db.role;
-
-db.sequelize.sync({ force: true }).then(() => {
-  console.log('Drop and Resync Db');
-  initial();
-});
 
 function initial() {
   Role.create({
@@ -41,6 +37,11 @@ function initial() {
     name: 'admin',
   });
 }
+
+db.sequelize.sync({ force: true }).then(() => {
+  console.log('Drop and Resync Db');
+  initial();
+});
 
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);

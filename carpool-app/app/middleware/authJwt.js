@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
-const config = require('../config/auth.config.js');
-const db = require('../models/index.js');
+const config = require('../config/auth.config');
+const db = require('../models/index');
+
 const User = db.user;
 
 const verifyToken = (req, res, next) => {
-  let token = req.headers['x-access-token'];
+  const token = req.headers['x-access-token'];
 
   if (!token) {
     return res.status(403).send({
@@ -19,8 +20,11 @@ const verifyToken = (req, res, next) => {
       });
     }
     req.userId = decoded.id;
-    next();
+
+    return next();
   });
+
+  return next();
 };
 
 const isAdmin = (req, res, next) => {
@@ -36,7 +40,6 @@ const isAdmin = (req, res, next) => {
       res.status(403).send({
         message: 'Require Admin Role!',
       });
-      return;
     });
   });
 };
@@ -81,9 +84,9 @@ const isModeratorOrAdmin = (req, res, next) => {
 };
 
 const authJwt = {
-  verifyToken: verifyToken,
-  isAdmin: isAdmin,
-  isModerator: isModerator,
-  isModeratorOrAdmin: isModeratorOrAdmin,
+  verifyToken,
+  isAdmin,
+  isModerator,
+  isModeratorOrAdmin,
 };
 module.exports = authJwt;
