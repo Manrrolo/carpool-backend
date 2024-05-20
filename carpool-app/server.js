@@ -48,7 +48,7 @@ require('./app/routes/user.routes')(app);
 
 // simple route
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to carpool application.' });
+  res.json({ message: 'Welcome to carpool application!' });
 });
 
 // set port, listen for requests
