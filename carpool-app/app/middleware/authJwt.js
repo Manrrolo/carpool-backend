@@ -1,75 +1,68 @@
 const jwt = require('jsonwebtoken');
-const config = require('../config/auth.config');
-const db = require('../models/index');
-
+const config = require('../config/auth.config.js');
+const db = require('../models');
 const User = db.user;
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers['x-access-token'];
+  let token = req.headers["x-access-token"];
 
   if (!token) {
     return res.status(403).send({
-      message: 'No token provided!',
+      message: "No token provided!"
     });
   }
 
-  jwt.verify(token, config.secret, (err, decoded) => {
+  jwt.verify(token.split(" ")[1], config.secret, (err, decoded) => {
     if (err) {
       return res.status(401).send({
-        message: 'Unauthorized!',
+        message: "Unauthorized!"
       });
     }
     req.userId = decoded.id;
-
-    return next();
+    next();
   });
-
-  return next();
 };
 
 const isAdmin = (req, res, next) => {
-  User.findByPk(req.userId).then((user) => {
+  User.findByPk(req.userId).then(user => {
     if (user.role === 'admin') {
       next();
       return;
     }
-
     res.status(403).send({
-      message: 'Require Admin Role!',
+      message: "Require Admin Role!"
     });
   });
 };
 
 const isDriver = (req, res, next) => {
-  User.findByPk(req.userId).then((user) => {
+  User.findByPk(req.userId).then(user => {
     if (user.role === 'driver') {
       next();
       return;
     }
-
     res.status(403).send({
-      message: 'Require Driver Role!',
+      message: "Require Driver Role!"
     });
   });
 };
 
-// const isPassenger = (req, res, next) => {
-//   User.findByPk(req.userId).then((user) => {
-//     if (user.role === 'passenger') {
-//       next();
-//       return;
-//     }
-
-//     res.status(403).send({
-//       message: 'Require Passenger Role!',
-//     });
-//   });
-// };
+const isPassenger = (req, res, next) => {
+  User.findByPk(req.userId).then(user => {
+    if (user.role === 'passenger') {
+      next();
+      return;
+    }
+    res.status(403).send({
+      message: "Require Passenger Role!"
+    });
+  });
+};
 
 const authJwt = {
   verifyToken,
   isAdmin,
   isDriver,
-  // isPassenger,
+  isPassenger
 };
 module.exports = authJwt;

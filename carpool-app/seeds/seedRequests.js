@@ -1,4 +1,4 @@
-const db = require('../models');
+const db = require('../app/models');
 
 const Request = db.request;
 

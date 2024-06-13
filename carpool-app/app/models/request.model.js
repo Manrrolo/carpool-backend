@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     reservationDate: {
-      type: Sequelize.DATETIME,
+      type: Sequelize.DATE,
     },
     status: {
       type: Sequelize.ENUM('pending', 'accepted', 'rejected'),
