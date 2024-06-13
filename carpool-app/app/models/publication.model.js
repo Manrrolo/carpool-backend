@@ -10,7 +10,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         references: {
           model: 'users',
-          key: 'id',
+          key: 'userId',
         },
       },
       origin: {
@@ -35,12 +35,12 @@ module.exports = (sequelize, Sequelize) => {
       },
     });
   
-    Publication.associate = models => {
-      Publication.belongsTo(models.User, {
-        foreignKey: 'driverId',
-        as: 'driver',
-      });
-    };
+    // Publication.associate = models => {
+    //   Publication.belongsTo(models.User, {
+    //     foreignKey: 'driverId',
+    //     as: 'driver',
+    //   });
+    // };
   
     return Publication;
   };
