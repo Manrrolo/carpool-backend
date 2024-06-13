@@ -11,9 +11,12 @@ const { Op } = db.Sequelize;
 exports.signup = (req, res) => {
   // Save User to Database
   User.create({
-    username: req.body.username,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
+    verified: false,
+    phone: req.body.phone,
   })
     .then((user) => {
       if (req.body.roles) {
@@ -43,7 +46,7 @@ exports.signup = (req, res) => {
 exports.signin = (req, res) => {
   User.findOne({
     where: {
-      username: req.body.username,
+      email: req.body.email,
     },
   })
     .then((user) => {
@@ -76,7 +79,7 @@ exports.signin = (req, res) => {
         }
         res.status(200).send({
           id: user.id,
-          username: user.username,
+          firstName: user.firstName,
           email: user.email,
           roles: authorities,
           accessToken: token,
