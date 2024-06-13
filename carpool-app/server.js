@@ -21,7 +21,7 @@ const db = require('./app/models');
 
 const Role = db.role;
 
-function initial() {
+function seedRoles() {
   Role.create({
     id: 1,
     name: 'user',
@@ -38,9 +38,15 @@ function initial() {
   });
 }
 
+// Seeds
+const seedsUsers = require('./seeds/seedUsers');
+const seedsPublications = require('./seeds/seedPublications');
+
 db.sequelize.sync({ force: true }).then(() => {
   console.log('Drop and Resync Db');
-  initial();
+  seedRoles();
+  seedsUsers.seedUsers();
+  seedsPublications.seedPublications();
 });
 
 require('./app/routes/auth.routes')(app);
