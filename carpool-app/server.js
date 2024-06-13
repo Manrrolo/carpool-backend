@@ -41,17 +41,20 @@ function seedRoles() {
 // Seeds
 const seedsUsers = require('./seeds/seedUsers');
 const seedsPublications = require('./seeds/seedPublications');
+const seedsVehicles = require('./seeds/seedVehicles');
 
 db.sequelize.sync({ force: true }).then(() => {
   console.log('Drop and Resync Db');
   seedRoles();
   seedsUsers.seedUsers();
   seedsPublications.seedPublications();
+  seedsVehicles.seedVehicles();
 });
 
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/publication.routes')(app);
+require('./app/routes/vehicle.routes')(app);
 
 // simple route
 app.get('/', (req, res) => {
