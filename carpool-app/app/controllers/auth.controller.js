@@ -68,24 +68,16 @@ exports.signin = (req, res) => {
         });
       }
 
-      const token = jwt.sign({ id: user.id }, config.secret, {
+      const token = jwt.sign({ id: user.userId }, config.secret, {
         algorithm: 'HS256',
-        allowInsecureKeySizes: true,
         expiresIn: 86400, // 24 hours
       });
 
-      const authorities = [];
-      user.getRoles().then((roles) => {
-        for (let i = 0; i < roles.length; i++) {
-          authorities.push(`ROLE_${roles[i].name.toUpperCase()}`);
-        }
-        res.status(200).send({
-          id: user.id,
-          firstName: user.firstName,
-          email: user.email,
-          roles: authorities,
-          accessToken: token,
-        });
+      res.status(200).send({
+        id: user.userId,
+        firstName: user.firstName,
+        email: user.email,
+        accessToken: token,
       });
     })
     .catch((err) => {
