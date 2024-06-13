@@ -36,7 +36,6 @@ db.user.hasMany(db.publication, {
   as: 'publications',
 });
 
-
 db.ROLES = ['user', 'admin', 'moderator'];
 
 module.exports = db;
