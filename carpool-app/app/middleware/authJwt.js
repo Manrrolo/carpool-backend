@@ -53,23 +53,23 @@ const isDriver = (req, res, next) => {
   });
 };
 
-const isPassenger = (req, res, next) => {
-  User.findByPk(req.userId).then((user) => {
-    if (user.role === 'passenger') {
-      next();
-      return;
-    }
+// const isPassenger = (req, res, next) => {
+//   User.findByPk(req.userId).then((user) => {
+//     if (user.role === 'passenger') {
+//       next();
+//       return;
+//     }
 
-    res.status(403).send({
-      message: 'Require Passenger Role!',
-    });
-  });
-};
+//     res.status(403).send({
+//       message: 'Require Passenger Role!',
+//     });
+//   });
+// };
 
 const authJwt = {
   verifyToken,
   isAdmin,
   isDriver,
-  isPassenger,
+  // isPassenger,
 };
 module.exports = authJwt;
