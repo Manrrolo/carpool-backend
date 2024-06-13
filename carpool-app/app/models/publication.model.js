@@ -35,12 +35,5 @@ module.exports = (sequelize, Sequelize) => {
       },
     });
   
-    // Publication.associate = models => {
-    //   Publication.belongsTo(models.User, {
-    //     foreignKey: 'driverId',
-    //     as: 'driver',
-    //   });
-    // };
-  
     return Publication;
   };
