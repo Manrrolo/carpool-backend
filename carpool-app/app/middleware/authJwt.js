@@ -29,56 +29,39 @@ const verifyToken = (req, res, next) => {
 
 const isAdmin = (req, res, next) => {
   User.findByPk(req.userId).then((user) => {
-    user.getRoles().then((roles) => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === 'admin') {
-          next();
-          return;
-        }
-      }
+    if (user.role === 'admin') {
+      next();
+      return;
+    }
 
-      res.status(403).send({
-        message: 'Require Admin Role!',
-      });
+    res.status(403).send({
+      message: 'Require Admin Role!',
     });
   });
 };
 
-const isModerator = (req, res, next) => {
+const isDriver = (req, res, next) => {
   User.findByPk(req.userId).then((user) => {
-    user.getRoles().then((roles) => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === 'moderator') {
-          next();
-          return;
-        }
-      }
+    if (user.role === 'driver') {
+      next();
+      return;
+    }
 
-      res.status(403).send({
-        message: 'Require Moderator Role!',
-      });
+    res.status(403).send({
+      message: 'Require Driver Role!',
     });
   });
 };
 
-const isModeratorOrAdmin = (req, res, next) => {
+const isPassenger = (req, res, next) => {
   User.findByPk(req.userId).then((user) => {
-    user.getRoles().then((roles) => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === 'moderator') {
-          next();
-          return;
-        }
+    if (user.role === 'passenger') {
+      next();
+      return;
+    }
 
-        if (roles[i].name === 'admin') {
-          next();
-          return;
-        }
-      }
-
-      res.status(403).send({
-        message: 'Require Moderator or Admin Role!',
-      });
+    res.status(403).send({
+      message: 'Require Passenger Role!',
     });
   });
 };
@@ -86,7 +69,7 @@ const isModeratorOrAdmin = (req, res, next) => {
 const authJwt = {
   verifyToken,
   isAdmin,
-  isModerator,
-  isModeratorOrAdmin,
+  isDriver,
+  isPassenger,
 };
 module.exports = authJwt;

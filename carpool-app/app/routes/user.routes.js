@@ -16,7 +16,7 @@ module.exports = function setupUserRoutes(app) {
 
   app.get(
     '/api/test/mod',
-    [authJwt.verifyToken, authJwt.isModerator],
+    [authJwt.verifyToken],
     controller.moderatorBoard,
   );
 
