@@ -4,7 +4,7 @@ const Vehicle = db.vehicle;
 
 function seedVehicles() {
   Vehicle.create({
-    userId: 1,
+    userId: 2,
     brand: 'Brand 1',
     model: 'Model 1',
     licensePlate: 'AA-AA-11',
@@ -18,7 +18,7 @@ function seedVehicles() {
   });
 
   Vehicle.create({
-    userId: 1,
+    userId: 2,
     brand: 'Brand 3',
     model: 'Model 3',
     licensePlate: 'CC-CC-33',
