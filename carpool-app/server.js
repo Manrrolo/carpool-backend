@@ -18,6 +18,42 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const db = require('./app/models');
+<<<<<<< HEAD
+
+const Role = db.role;
+
+function seedRoles() {
+  Role.create({
+    id: 1,
+    name: 'passenger',
+  });
+
+  Role.create({
+    id: 2,
+    name: 'driver',
+  });
+
+  Role.create({
+    id: 3,
+    name: 'admin',
+  });
+}
+
+// Seeds
+const seedsUsers = require('./seeds/seedUsers');
+const seedsPublications = require('./seeds/seedPublications');
+const seedsVehicles = require('./seeds/seedVehicles');
+const seedsRequests = require('./seeds/seedRequests');
+
+db.sequelize.sync({ force: true }).then(() => {
+  console.log('Drop and Resync Db');
+  seedRoles();
+  seedsUsers.seedUsers();
+  seedsPublications.seedPublications();
+  seedsVehicles.seedVehicles();
+  seedsRequests.seedRequests();
+});
+=======
 const seedRoles = require('./app/seeds/seedRoles'); // Importar la semilla de roles
 const seedUsers = require('./app/seeds/seedUsers');
 const seedPublications = require('./app/seeds/seedPublications');
@@ -37,10 +73,15 @@ async function initializeDatabase() {
 }
 
 initializeDatabase()
+>>>>>>> a92043241937000d594d9b273edd704d57e4881a
 
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/publication.routes')(app);
+<<<<<<< HEAD
+require('./app/routes/vehicle.routes')(app);
+=======
+>>>>>>> a92043241937000d594d9b273edd704d57e4881a
 require('./app/routes/request.routes')(app);
 
 // simple route

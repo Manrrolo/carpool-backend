@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+const { publication } = require(".");
+
+=======
+>>>>>>> a92043241937000d594d9b273edd704d57e4881a
 module.exports = (sequelize, Sequelize) => {
   const Request = sequelize.define('requests', {
     requestId: {
@@ -25,7 +30,11 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.DATE,
     },
     status: {
+<<<<<<< HEAD
+      type: Sequelize.ENUM('pending', 'accepted', 'rejected'),
+=======
       type: Sequelize.STRING,
+>>>>>>> a92043241937000d594d9b273edd704d57e4881a
     },
   });
 
