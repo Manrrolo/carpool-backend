@@ -5,8 +5,7 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   dialect: dbConfig.dialect,
   port: dbConfig.port,
-  operatorsAliases: false,
-
+  logging: false,
   pool: {
     idle: dbConfig.pool.idle,
   },
@@ -43,6 +42,14 @@ db.request.belongsTo(db.publication, {
 });
 db.publication.hasMany(db.request, {
   foreignKey: 'publicationId',
+  as: 'requests',
+});
+db.request.belongsTo(db.user, {
+  foreignKey: 'passengerId',
+  as: 'passenger',
+});
+db.user.hasMany(db.request, {
+  foreignKey: 'passengerId',
   as: 'requests',
 });
 

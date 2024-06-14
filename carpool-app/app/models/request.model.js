@@ -1,5 +1,3 @@
-const { publication } = require(".");
-
 module.exports = (sequelize, Sequelize) => {
   const Request = sequelize.define('requests', {
     requestId: {
@@ -27,7 +25,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.DATE,
     },
     status: {
-      type: Sequelize.ENUM('pending', 'accepted', 'rejected'),
+      type: Sequelize.STRING,
     },
   });
 
