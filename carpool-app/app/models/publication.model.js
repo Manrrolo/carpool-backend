@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
     const Publication = sequelize.define('publications', {
-      id: {
+      publicationId: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -34,13 +34,6 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
       },
     });
-  
-    // Publication.associate = models => {
-    //   Publication.belongsTo(models.User, {
-    //     foreignKey: 'driverId',
-    //     as: 'driver',
-    //   });
-    // };
   
     return Publication;
   };
