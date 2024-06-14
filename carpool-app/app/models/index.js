@@ -20,10 +20,10 @@ db.sequelize = sequelize;
 db.user = require('./user.model')(sequelize, Sequelize);
 db.role = require('./role.model')(sequelize, Sequelize);
 db.publication = require('./publication.model')(sequelize, Sequelize);
-
-
+db.request = require('./request.model')(sequelize, Sequelize);
 db.vehicle = require('./vehicle.model')(sequelize, Sequelize);
 
+// Define relationships
 db.role.belongsToMany(db.user, {
   through: 'user_roles',
 });
@@ -41,6 +41,14 @@ db.user.hasMany(db.publication, {
 db.user.hasMany(db.vehicle, {
   foreignKey: 'userId',
   as: 'vehicles'
+});
+db.request.belongsTo(db.publication, {
+  foreignKey: 'publicationId',
+  as: 'publication',
+});
+db.publication.hasMany(db.request, {
+  foreignKey: 'publicationId',
+  as: 'requests',
 });
 
 db.ROLES = ['user', 'admin', 'moderator'];

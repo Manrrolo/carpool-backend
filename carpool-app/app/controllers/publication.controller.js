@@ -43,9 +43,11 @@ exports.getPublicationsByUserId = (req, res) => {
     });
 };
 
-// POST crear una nueva publicación
+// POST crear una nueva publicación (solo para drivers)
 exports.createPublication = (req, res) => {
-  const { driverId, origin, destination, availableSeats, cost } = req.body;
+  const { origin, destination, availableSeats, cost } = req.body;
+  const driverId = req.userId;
+
   Publication.create({ driverId, origin, destination, availableSeats, cost, status: false })
     .then(publication => {
       res.status(201).send(publication);
@@ -55,39 +57,69 @@ exports.createPublication = (req, res) => {
     });
 };
 
-// PUT actualizar una publicación existente
+// PATCH actualizar una publicación existente (solo para drivers)
 exports.updatePublication = (req, res) => {
   const id = req.params.id;
-  const { driverId, origin, destination, availableSeats, cost, status } = req.body;
+  const { origin, destination, availableSeats, cost, status } = req.body;
+  const driverId = req.userId;
 
-  Publication.update({ driverId, origin, destination, availableSeats, cost, status }, {
-    where: { id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.status(200).send({ message: "Publication was updated successfully." });
-      } else {
-        res.status(404).send({ message: `Cannot update Publication with id=${id}. Maybe Publication was not found or req.body is empty!` });
+  // Verificar si la publicación pertenece al driver
+  Publication.findByPk(id)
+    .then(publication => {
+      if (!publication) {
+        return res.status(404).send({ message: "Publication Not found." });
       }
+      if (publication.driverId !== driverId) {
+        return res.status(403).send({ message: "You can only update your own publications." });
+      }
+
+      Publication.update({ origin, destination, availableSeats, cost, status }, {
+        where: { id }
+      })
+        .then(num => {
+          if (num == 1) {
+            res.status(200).send({ message: "Publication was updated successfully." });
+          } else {
+            res.status(404).send({ message: `Cannot update Publication with id=${id}. Maybe Publication was not found or req.body is empty!` });
+          }
+        })
+        .catch(err => {
+          res.status(500).send({ message: err.message });
+        });
     })
     .catch(err => {
       res.status(500).send({ message: err.message });
     });
 };
 
-// DELETE eliminar una publicación existente
+// DELETE eliminar una publicación existente (solo para drivers)
 exports.deletePublication = (req, res) => {
   const id = req.params.id;
+  const driverId = req.userId;
 
-  Publication.destroy({
-    where: { id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.status(200).send({ message: "Publication was deleted successfully!" });
-      } else {
-        res.status(404).send({ message: `Cannot delete Publication with id=${id}. Maybe Publication was not found!` });
+  // Verificar si la publicación pertenece al driver
+  Publication.findByPk(id)
+    .then(publication => {
+      if (!publication) {
+        return res.status(404).send({ message: "Publication Not found." });
       }
+      if (publication.driverId !== driverId) {
+        return res.status(403).send({ message: "You can only delete your own publications." });
+      }
+
+      Publication.destroy({
+        where: { id }
+      })
+        .then(num => {
+          if (num == 1) {
+            res.status(200).send({ message: "Publication was deleted successfully!" });
+          } else {
+            res.status(404).send({ message: `Cannot delete Publication with id=${id}. Maybe Publication was not found!` });
+          }
+        })
+        .catch(err => {
+          res.status(500).send({ message: err.message });
+        });
     })
     .catch(err => {
       res.status(500).send({ message: err.message });
