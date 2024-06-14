@@ -28,6 +28,6 @@ module.exports = function(app) {
   // Actualizar el estado de una solicitud (solo para el driver)
   app.put("/api/requests/status/:requestId", [authJwt.verifyToken, authJwt.isDriver], requests.updateRequestStatus);
 
-  // Actualizar una solicitud (solo para el passenger)
-  app.put("/api/requests/:requestId", [authJwt.verifyToken], requests.updateRequestByPassenger);
+  // // Actualizar una solicitud (solo para el passenger)
+  // app.put("/api/requests/:requestId", [authJwt.verifyToken], requests.updateRequestByPassenger);
 };

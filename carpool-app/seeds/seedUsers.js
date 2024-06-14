@@ -1,13 +1,24 @@
 const db = require('../app/models');
+const bcrypt = require('bcryptjs');
 
 const User = db.user;
 
 function seedUsers() {
   User.create({
-    userId: 1,
+    firstName: 'Admin',
+    lastName: 'User',
+    password: bcrypt.hashSync('admin', 10),
+    email: 'admin@uc.cl',
+    verified: true,
+    phone: '1234567890',
+    role: 'admin',
+    created_at: new Date(),
+  });
+
+  User.create({
     firstName: 'John',
     lastName: 'Doe',
-    password: '$2b$10$wz6oD13lQIlvVxnPA1WkSOoDjQ4x1v2A2NfPiUHDw8AFQeyPENXOy',
+    password: bcrypt.hashSync('123', 10),
     email: 'john.doe@example.com',
     verified: true,
     phone: '1234567890',
@@ -16,10 +27,9 @@ function seedUsers() {
   });
 
   User.create({
-    userId: 2,
     firstName: 'Jane',
     lastName: 'Doe',
-    password: '$2b$10$wz6oD13lQIlvVxnPA1WkSOoDjQ4x1v2A2NfPiUHDw8AFQeyPENXOy',
+    password: bcrypt.hashSync('123', 10),
     email: 'jane.doe@example.com',
     verified: true,
     phone: '0987654321',

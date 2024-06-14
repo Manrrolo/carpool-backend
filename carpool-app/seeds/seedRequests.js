@@ -12,7 +12,7 @@ function seedRequests() {
 
   Request.create({
     publicationId: 2,
-    passengerId: 1,
+    passengerId: 3,
     reservationDate: new Date(),
     status: 'accepted',
   });

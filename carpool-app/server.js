@@ -39,16 +39,16 @@ function seedRoles() {
 }
 
 // Seeds
-// const seedsUsers = require('./seeds/seedUsers');
-// const seedsPublications = require('./seeds/seedPublications');
-// const seedsRequests = require('./seeds/seedRequests');
+const seedsUsers = require('./seeds/seedUsers');
+const seedsPublications = require('./seeds/seedPublications');
+const seedsRequests = require('./seeds/seedRequests');
 
 db.sequelize.sync({ force: true }).then(() => {
   console.log('Drop and Resync Db');
   seedRoles();
-  // seedsUsers.seedUsers();
-  // seedsPublications.seedPublications();
-  // seedsRequests.seedRequests();
+  seedsUsers.seedUsers();
+  seedsPublications.seedPublications();
+  seedsRequests.seedRequests();
 });
 
 require('./app/routes/auth.routes')(app);
