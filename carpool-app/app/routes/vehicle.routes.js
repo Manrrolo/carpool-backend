@@ -11,15 +11,17 @@ module.exports = function setupVehiclesRoutes(app) {
   });
 
 
-  app.get('/api/vehicles', controller.getVehicles);
+  // obtener todos los vehiculos de un driver
+  app.get('/api/vehicles/driver', [authJwt.verifyToken, authJwt.isDriver], controller.getAllVehiclesForDriver);
 
-  app.post('/api/vehicles', controller.createVehicle);
+  // crear vehiculo (solo drivers)
+  app.post('/api/vehicles', [authJwt.verifyToken, authJwt.isDriver], controller.createVehicle);
 
-  app.patch('/api/vehicles/:id', controller.updateVehicle);
+  // actualizar vehiculo (solo driver al que pertenece)
+  app.patch('/api/vehicles/:vehicleId', [authJwt.verifyToken, authJwt.isDriver], controller.updateVehicle);
 
-  app.delete('/api/vehicles/:id', controller.deleteVehicle);
+  // eliminar vehiculo (solo driver al que pertenece)
+  app.delete('/api/vehicles/:vehicleId', [authJwt.verifyToken, authJwt.isDriver],controller.deleteVehicle);
 
   app.get('/api/vehicles/:id', controller.getVehicleById);
-
-  app.get('/api/users/:userId/vehicles', controller.getVehicleByUserId);
 };

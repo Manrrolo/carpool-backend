@@ -1,8 +1,12 @@
 const db = require('../models');
 const Vehicle = db.vehicle;
 
-exports.getVehicles = (req, res) => {
-    Vehicle.findAll()
+exports.getAllVehiclesForDriver = (req, res) => {
+    const driverId = req.userId;
+
+    Vehicle.findAll({
+        where: { userId: driverId},
+    })
       .then(vehicles => {
         res.status(200).send(vehicles);
       })
@@ -12,7 +16,15 @@ exports.getVehicles = (req, res) => {
 };
 
 exports.createVehicle = (req, res) => {
-    const { userId, brand, model, licensePlate } = req.body;
+    const userId = req.userId;
+    const { brand, model, licensePlate } = req.body;
+
+    if (!userId || !brand || !model || !licensePlate){
+        return res.status(400).send({ message: "Missing data to create Vehicle."})
+    }
+
+
+
     Vehicle.create ( {userId, brand, model, licensePlate})
         .then( vehicle => {
             res.status(201).send(vehicle);
@@ -22,12 +34,25 @@ exports.createVehicle = (req, res) => {
         });
 };
 
-exports.updateVehicle = (req, res) => {
-    const id = req.params.id;
-    const { userId, brand, model, licensePlate} = req.body;
+exports.updateVehicle = async (req, res) => {
+    const vehicleId = req.params.vehicleId;
+    const userId = req.userId;
+    const { brand, model, licensePlate} = req.body;
 
-    Vehicle.update ( {userId, brand, model, licensePlate}, {
-        where: {vehicleId: id}
+    const vehicle = await Vehicle.findByPk(vehicleId);
+    if (!vehicle){
+        return res.status(404).send( {message: `Cannot find Vehicle with id=${vehicleId}`})
+    }
+
+    // Check driver
+    if (vehicle.userId !== userId){
+        return res.status(403).send( {message: `You are not authorized to update this vehicle.`})
+    }
+
+    // update
+
+    Vehicle.update ( {brand, model, licensePlate}, {
+        where: {vehicleId: vehicleId}
     })
     .then( num => {
         if (num == 1) {
@@ -41,11 +66,22 @@ exports.updateVehicle = (req, res) => {
     })
 };
 
-exports.deleteVehicle = (req, res) => {
-    const id = req.params.id;
+exports.deleteVehicle = async (req, res) => {
+    const vehicleId = req.params.vehicleId;
+    const userId = req.userId;
+
+    const vehicle = await Vehicle.findByPk(vehicleId);
+    if (!vehicle){
+        return res.status(404).send( {message: `Cannot find Vehicle with id=${vehicleId}`})
+    }
+
+    // Check driver
+    if (vehicle.userId !== userId){
+        return res.status(403).send( {message: `You are not authorized to delete this vehicle.`})
+    }
 
     Vehicle.destroy({
-        where: {vehicleId: id}
+        where: {vehicleId: vehicleId}
     })
     .then(num => {
         if (num == 1) {
@@ -72,18 +108,3 @@ exports.getVehicleById = (req, res) => {
             res.status(500).send({ message: err.message});
         });
 };
-
-exports.getVehicleByUserId = (req, res) => {
-    const userId = req.params.userId;
-    Vehicle.findAll({
-        where: {
-          userId: userId
-        }
-      })
-        .then(vehicles => {
-          res.status(200).send(vehicles);
-        })
-        .catch(err => {
-          res.status(500).send({ message: err.message });
-        });
-}
