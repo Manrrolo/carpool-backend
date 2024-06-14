@@ -1,9 +1,14 @@
+<<<<<<< HEAD
+=======
+// app/controllers/request.controller.js
+>>>>>>> a92043241937000d594d9b273edd704d57e4881a
 const db = require('../models');
 const Request = db.request;
 const Publication = db.publication;
 const User = db.user;
 
 // GET all requests for a driver
+<<<<<<< HEAD
 exports.getAllRequestsForDriver = (req, res) => {
   const driverId = req.userId; 
 
@@ -83,6 +88,88 @@ exports.createRequest = (req, res) => {
     .catch(err => {
       res.status(500).send({ message: err.message });
     });
+=======
+exports.getAllRequestsForDriver = async (req, res) => {
+  try {
+    const driverId = req.userId; 
+
+    const publications = await Publication.findAll({
+      where: { driverId },
+      include: [
+        {
+          model: Request,
+          as: 'requests'
+        }
+      ]
+    });
+
+    const requests = publications.flatMap(publication => publication.requests);
+    res.status(200).send(requests);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// GET all requests for a publication
+exports.getRequestsForPublication = async (req, res) => {
+  try {
+    const publicationId = req.params.publicationId;
+
+    const requests = await Request.findAll({
+      where: { publicationId }
+    });
+
+    res.status(200).send(requests);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// GET all requests for a passenger
+exports.getAllRequestsForPassenger = async (req, res) => {
+  try {
+    const passengerId = req.userId;
+
+    const requests = await Request.findAll({
+      where: { passengerId }
+    });
+
+    res.status(200).send(requests);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// GET a request by ID
+exports.getRequestById = async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+
+    const request = await Request.findByPk(requestId);
+
+    if (!request) {
+      return res.status(404).send({ message: "Request Not found." });
+    }
+
+    res.status(200).send(request);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// POST create a new request for a publication
+exports.createRequest = async (req, res) => {
+  try {
+    const { publicationId, reservationDate } = req.body;
+    const passengerId = req.userId;
+
+    const request = await Request.create({ publicationId, passengerId, reservationDate, status: 'pending' });
+
+    res.status(201).send(request);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+>>>>>>> a92043241937000d594d9b273edd704d57e4881a
 };
 
 // PUT update the status of a request by the driver
@@ -123,6 +210,7 @@ exports.updateRequestStatus = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+<<<<<<< HEAD
 
 // // PUT update a request by the passenger
 // exports.updateRequestByPassenger = (req, res) => {
@@ -143,3 +231,5 @@ exports.updateRequestStatus = async (req, res) => {
 //       res.status(500).send({ message: err.message });
 //     });
 // };
+=======
+>>>>>>> a92043241937000d594d9b273edd704d57e4881a

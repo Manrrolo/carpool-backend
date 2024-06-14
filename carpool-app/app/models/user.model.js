@@ -24,11 +24,8 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     role: {
-      type: Sequelize.ENUM('driver', 'passenger', 'admin'),
-    },
-    created_at: {
-      type: Sequelize.DATE,
-    },
+      type: Sequelize.STRING,
+    }
   });
 
   return User;
