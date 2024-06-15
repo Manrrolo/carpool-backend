@@ -1,4 +1,4 @@
-const db = require('../app/models');
+const db = require('../models');
 
 const Vehicle = db.vehicle;
 
@@ -25,4 +25,4 @@ function seedVehicles() {
   });
 }
 
-module.exports = { seedVehicles };
+module.exports = seedVehicles;
