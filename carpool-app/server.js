@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const process = require('process');
 require('dotenv').config();
+const { swaggerUi, specs } = require('./app/swagger');
 
 const app = express();
 
@@ -36,13 +37,16 @@ async function initializeDatabase() {
   }
 }
 
-initializeDatabase()
+initializeDatabase();
 
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/publication.routes')(app);
 require('./app/routes/vehicle.routes')(app);
 require('./app/routes/request.routes')(app);
+
+// Swagger route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // simple route
 app.get('/', (req, res) => {

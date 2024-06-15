@@ -27,7 +27,9 @@
     "pg-hstore": "^2.3.4",
     "rewire": "^7.0.0",
     "sequelize": "^6.37.3",
-    "sequelize-mock": "^0.10.2"
+    "sequelize-mock": "^0.10.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
