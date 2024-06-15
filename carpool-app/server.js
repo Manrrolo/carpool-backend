@@ -22,6 +22,8 @@ const seedRoles = require('./app/seeds/seedRoles'); // Importar la semilla de ro
 const seedUsers = require('./app/seeds/seedUsers');
 const seedPublications = require('./app/seeds/seedPublications');
 const seedRequests = require('./app/seeds/seedRequests');
+const seedVehicles = require('./app/seeds/seedVehicles');
+const seedTrips = require('./app/seeds/seedTrips');
 
 async function initializeDatabase() {
   try {
@@ -31,6 +33,8 @@ async function initializeDatabase() {
     await seedUsers();
     await seedPublications();
     await seedRequests();
+    await seedVehicles();
+    await seedTrips();
   } catch (error) {
     console.error('Unable to initialize database:', error);
   }
@@ -43,6 +47,7 @@ require('./app/routes/user.routes')(app);
 require('./app/routes/publication.routes')(app);
 require('./app/routes/vehicle.routes')(app);
 require('./app/routes/request.routes')(app);
+require('./app/routes/trip.routes')(app);
 
 // simple route
 app.get('/', (req, res) => {
