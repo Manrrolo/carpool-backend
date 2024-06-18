@@ -6,21 +6,21 @@ async function seedRequests() {
   try {
     await Request.create({
       publicationId: 1,
-      passengerId: 2,
+      passengerId: 'auth0|667209355ff76c5f6ecc52c0',
       reservationDate: new Date(),
       status: 'pending',
     });
 
     await Request.create({
       publicationId: 2,
-      passengerId: 3,
+      passengerId: 'auth0|6672097fdff67714af259298',
       reservationDate: new Date(),
       status: 'accepted',
     });
 
     await Request.create({
       publicationId: 3,
-      passengerId: 2,
+      passengerId: 'auth0|667209355ff76c5f6ecc52c0',
       reservationDate: new Date(),
       status: 'rejected',
     });

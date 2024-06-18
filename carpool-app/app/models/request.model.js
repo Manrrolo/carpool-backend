@@ -14,7 +14,7 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     passengerId: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
       allowNull: false,
       references: {
         model: 'users',
