@@ -48,7 +48,7 @@ exports.createPublication = (req, res) => {
   const { origin, destination, availableSeats, cost } = req.body;
   const driverId = req.userId;
 
-  Publication.create({ driverId, origin, destination, availableSeats, cost, status: false })
+  Publication.create({ driverId, driverName, origin, destination, availableSeats, cost, status: false, departureDate })
     .then(publication => {
       res.status(201).send(publication);
     })
@@ -60,7 +60,7 @@ exports.createPublication = (req, res) => {
 // PATCH actualizar una publicación existente (solo para drivers)
 exports.updatePublication = (req, res) => {
   const id = req.params.id;
-  const { origin, destination, availableSeats, cost, status } = req.body;
+  const { origin, destination, availableSeats, cost, status, departureDate } = req.body;
   const driverId = req.userId;
 
   // Verificar si la publicación pertenece al driver
