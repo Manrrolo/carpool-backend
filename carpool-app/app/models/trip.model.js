@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
                 key: 'publicationId'
             }
         },
-        driverId: {
+        userId: {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: {

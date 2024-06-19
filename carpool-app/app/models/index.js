@@ -63,16 +63,16 @@ db.user.hasMany(db.request, {
   as: 'requests',
 });
 db.user.hasMany(db.trip, {
-  foreignKey: 'driverId',
+  foreignKey: 'userId',
   as: 'trips',
 })
 db.trip.belongsTo(db.user, {
-  foreignKey: 'driverId',
-  as: 'driver',
+  foreignKey: 'userId',
+  as: 'user',
 })
-db.publication.hasOne(db.trip, {
+db.publication.hasMany(db.trip, {
   foreignKey: 'publicationId',
-  as: 'trip',
+  as: 'trips',
 })
 db.trip.belongsTo(db.publication, {
   foreignKey: 'publicationId',
