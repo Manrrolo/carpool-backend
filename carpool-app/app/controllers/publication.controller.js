@@ -45,7 +45,7 @@ exports.getPublicationsByUserId = (req, res) => {
 
 // POST crear una nueva publicación (solo para drivers)
 exports.createPublication = (req, res) => {
-  const { origin, destination, availableSeats, cost } = req.body;
+  const { origin, destination, availableSeats, cost, driverName, departureDate } = req.body;
   const driverId = req.userId;
 
   Publication.create({ driverId, driverName, origin, destination, availableSeats, cost, status: false, departureDate })
@@ -73,7 +73,7 @@ exports.updatePublication = (req, res) => {
         return res.status(403).send({ message: "You can only update your own publications." });
       }
 
-      Publication.update({ origin, destination, availableSeats, cost, status }, {
+      Publication.update({ origin, destination, availableSeats, cost, status, departureDate }, {
         where: { id }
       })
         .then(num => {
