@@ -3,6 +3,7 @@ const db = require('../models');
 const Request = db.request;
 const Publication = db.publication;
 const User = db.user;
+const Trip = db.trip;
 
 // GET all requests for a driver
 exports.getAllRequestsForDriver = async (req, res) => {
@@ -117,6 +118,10 @@ exports.updateRequestStatus = async (req, res) => {
     });
 
     if (updatedRequest == 1) {
+      if (status == "accepted"){
+        const trip = await Trip.create({ publicationId: request.publication.publicationId, userId: request.passengerId, status: 'pending' })
+      }
+
       res.status(200).send({ message: "Request status was updated successfully." });
     } else {
       res.status(404).send({ message: `Cannot update Request with id=${requestId}.` });

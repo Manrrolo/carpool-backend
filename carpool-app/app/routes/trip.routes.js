@@ -14,21 +14,25 @@ module.exports = function setupTripRoutes(app) {
   // obtener todos los trips de un driver
   app.get('/api/trips/driver', [authJwt.verifyToken, authJwt.isDriver], controller.getAllTripsForDriver);
 
-  // obtener trip de una publication (driver y passenger?)
-  app.get('/api/trips/publication/:publicationId', [authJwt.verifyToken], controller.getTripForPublication);
+  // obtener trips de una publication (driver)
+  app.get('/api/trips/publication/:publicationId', [authJwt.verifyToken, authJwt.isDriver], controller.getTripsForPublication);
 
-  // obtener todos los trips de un passenger
+  // obtener el trip de driver de una publicacion (solo el propio driver)
+  app.get('/api/trips/driver/publication/:publicationId', [authJwt.verifyToken, authJwt.isDriver], controller.getDriverTripOfPublication);
+
+  // obtener todos los trips de un passenger, drivers no veran trips de sus propios viajes
   app.get('/api/trips/passenger', [authJwt.verifyToken], controller.getAllTripsForPassenger);
 
   // obtener trip por ID
   app.get('/api/trips/:tripId', [authJwt.verifyToken, authJwt.isDriver], controller.getTripById);
 
-  // crear trip (solo drivers, inicia con estado 'in pending')
-  app.post('/api/trips', [authJwt.verifyToken, authJwt.isDriver], controller.createTrip);
+  // crear trip (passengers y driver)
+  //app.post('/api/trips', [authJwt.verifyToken], controller.createTrip);
+  // ahora trips se crean automaticamente, el de driver al crear publicacion y los de pasajeros al aceptarse su solicitud
 
-  // comenzar trip (solo driver al que pertenece, actualiza estado a 'in progress' y actualiza departureDateTime)
-  app.put('/api/trips/start/:tripId', [authJwt.verifyToken, authJwt.isDriver], controller.startTrip);
+  // comenzar trip (driver y passenger,no se puede tener mas de uno in progress)
+  app.put('/api/trips/start/:tripId', [authJwt.verifyToken], controller.startTrip);
 
-  // terminar trip (solo driver al que pertenece, actualiza estado a 'completed' y actualiza arrivalDateTime)
-  app.put('/api/trips/complete/:tripId', [authJwt.verifyToken, authJwt.isDriver], controller.completeTrip);
+  // terminar trip (driver y user, actualiza estado a 'completed' y actualiza arrivalDateTime)
+  app.put('/api/trips/complete/:tripId', [authJwt.verifyToken], controller.completeTrip);
 };

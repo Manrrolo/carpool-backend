@@ -2,26 +2,44 @@ const db = require('../models');
 const Trip = db.trip;
 const Publication = db.publication;
 const Request = db.request;
-const { DataTypes } = require('sequelize');
+const { DataTypes, Op, where } = require('sequelize');
 
 // GET all trips for a driver
 exports.getAllTripsForDriver = async (req, res) => {
-    const driverId = req.userId;
-
-    Trip.findAll({
-      where: { driverId: driverId },
-    })
-        .then(trips => {
-            res.status(200).send(trips);
-        })
-        .catch(err => {
-            res.status(500).send(err.message);
-        })
+    // encontrar todas las publicaciones que le pertenecen y luego sus viajes
+    try {
+      const driverId = req.userId;
+      const publications = await Publication.findAll({
+          where: {
+              driverId: driverId,
+          },
+          include: [
+              {
+                  model: Trip,
+                  as: 'trips',
+                  where: {
+                    userId: driverId
+                  }
+              }
+          ]
+      });
+      const trips = publications.flatMap(publications => publications.trips);
+      res.status(200).send(trips);
+    } catch (err) {
+      res.status(500).send({ message: err.message });
+    }
 };
 
-// GET trip for a publication
-exports.getTripForPublication = async (req, res) => {
+// GET trips for a publication, only driver
+exports.getTripsForPublication = async (req, res) => {
     const publicationId = req.params.publicationId;
+    const driverId = req.userId;
+
+    // validar que la publicacion pertenece al driver
+    const publication = await Publication.findByPk(publicationId);
+    if (publication.driverId !== driverId) {
+      return res.status(403).send({ message: 'You are not authorized to view trips of this publication!.' });
+    }
 
     Trip.findAll({
       where: { publicationId: publicationId },
@@ -34,29 +52,49 @@ exports.getTripForPublication = async (req, res) => {
         })
 };
 
-// GET all trips for a passenger
+// GET driver trip of a publication, only driver
+exports.getDriverTripOfPublication = async (req, res) => {
+  const publicationId = req.params.publicationId;
+  const driverId = req.userId;
+
+  // validar que la publicacion pertenece al driver
+  const publication = await Publication.findByPk(publicationId);
+  if (publication.driverId !== driverId) {
+    return res.status(403).send({ message: 'You are not authorized to view this trip!.' });
+  }
+
+  Trip.findOne({
+    where: {
+      publicationId: publicationId,
+      userId: driverId,
+     },
+  })
+      .then(trip => {
+          res.status(200).send(trip);
+      })
+      .catch(err => {
+          res.status(500).send(err.message);
+      })
+}
+
+// GET all trips for a passenger (si passenger es driver de alguno de esos trips, no se mostrara)
 exports.getAllTripsForPassenger = async (req, res) => {
   try {
     const passengerId = req.userId;
+    const publications = await Publication.findAll({
+      where:{
+        driverId: { [Op.ne]: passengerId},
+      },
+      include: [
+        {
+          model: Trip,
+          as: 'trips',
+          where: {userId: passengerId},
+        }
+      ]
+    })
 
-    const requests = await Request.findAll({
-        where: {
-            passengerId: passengerId,
-            status: 'accepted',
-        },
-        include: [
-            {
-                model: Publication,
-                as: 'publication',
-                include: [{
-                    model: Trip,
-                    as: 'trip',
-                }]
-            }
-        ]
-    });
-
-    const trips = requests.flatMap(requests => requests.publication.trip);
+    const trips = publications.flatMap(publications => publications.trips);
     res.status(200).send(trips);
   } catch (err) {
     res.status(500).send({ message: err.message });
@@ -84,11 +122,42 @@ exports.getTripById = async (req, res) => {
 exports.createTrip = async (req, res) => {
   try {
     const { publicationId } = req.body;
-    const driverId = req.userId;
+    const userId = req.userId;
 
-    const trip = await Trip.create({ publicationId: publicationId, driverId: driverId, status: 'pending'});
+    // verificar que usuario no tiene ya creado un trip de esta publicacion
+    const verifyTrip = await Trip.findOne({
+      where: {
+        userId: userId,
+        publicationId: publicationId
+      },
+    });
+    if (verifyTrip){
+      return res.status(403).send({ message: 'You can only have one trip for publication!'})
+    }
 
-    res.status(201).send(trip);
+    // si usuario es driver de publicacion se crea, sino hay que verificar que pasajero tenga request aceptada
+    const publication = await Publication.findByPk(publicationId);
+
+    if (publication.driverId == userId){
+      const trip = await Trip.create({ publicationId: publicationId, userId: userId, status: 'pending'});
+      return res.status(201).send(trip);
+    }
+
+    // pasajero
+    const request = await Request.findOne({
+      where: {
+        publicationId: publicationId,
+        passengerId: userId,
+        status: 'accepted',
+      }
+    })
+    console.log(request);
+    if (request){
+      const trip = await Trip.create({ publicationId: publicationId, userId: userId, status: 'pending'});
+      return res.status(201).send(trip);
+    } else {
+      return res.status(403).send({ message: 'You are not accepted on this trip!'})
+    }
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
@@ -99,17 +168,18 @@ exports.startTrip = async (req, res) => {
   try {
     const tripId = req.params.tripId;
     const status = 'in progress';
-    const driverId = req.userId;
+    const userId = req.userId;
     const current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
+    // existe trip?
     const trip = await Trip.findByPk(tripId);
 
     if (!trip) {
       return res.status(404).send({ message: `Cannot find Trip with id=${tripId}.` });
     }
 
-    // Check driverId
-    if (trip.driverId !== driverId) {
+    // Check userId
+    if (trip.userId !== userId) {
       return res.status(403).send({ message: 'You are not authorized to update the status of this trip.' });
     }
 
@@ -117,12 +187,12 @@ exports.startTrip = async (req, res) => {
     const tripsInProgress = await Trip.findAll({
       where:
       {
-        driverId: driverId,
+        userId: userId,
         status: 'in progress',
       }
     })
 
-    if (tripsInProgress){
+    if (tripsInProgress.length > 0){
       return res.status(403).send({ message: 'Cannot make two trips at the same time' });
     }
 
@@ -141,12 +211,12 @@ exports.startTrip = async (req, res) => {
   }
 };
 
-// PUT update the status of a trip to 'in progress', and update departureDateTime
+// PUT update the status of a trip to 'complete', and update arrivalDateTime
 exports.completeTrip = async (req, res) => {
     try {
       const tripId = req.params.tripId;
       const status = 'completed';
-      const driverId = req.userId;
+      const userId = req.userId;
       const current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
       const trip = await Trip.findByPk(tripId);
@@ -155,8 +225,8 @@ exports.completeTrip = async (req, res) => {
         return res.status(404).send({ message: `Cannot find Trip with id=${tripId}.` });
       }
 
-      // Check driverId
-      if (trip.driverId !== driverId) {
+      // Check userId
+      if (trip.userId !== userId) {
         return res.status(403).send({ message: 'You are not authorized to update the status of this trip.' });
       }
 
