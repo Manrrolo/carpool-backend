@@ -34,7 +34,7 @@ async function seedPublications() {
       availableSeats: 2,
       cost: 20,
       status: false,
-      departureDate: new Date(Date.now() + 2 * 60 * 60 * 1000), // Fixed the typo here
+      departureDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
     });
   } catch (error) {
     console.error('Error seeding publications:', error);

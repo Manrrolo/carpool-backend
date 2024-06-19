@@ -22,6 +22,7 @@ db.publication = require('./publication.model')(sequelize, Sequelize);
 db.request = require('./request.model')(sequelize, Sequelize);
 db.vehicle = require('./vehicle.model')(sequelize, Sequelize);
 db.trip = require('./trip.model')(sequelize, Sequelize);
+db.review = require('./review.model')(sequelize, Sequelize);
 
 // Define relationships
 db.role.belongsToMany(db.user, {
@@ -77,7 +78,23 @@ db.publication.hasMany(db.trip, {
 db.trip.belongsTo(db.publication, {
   foreignKey: 'publicationId',
   as: 'publication',
-})
+});
+db.user.hasMany(db.review, { 
+  foreignKey: 'userId', 
+  as: 'reviews' 
+});
+db.review.belongsTo(db.user, { 
+  foreignKey: 'userId', 
+  as: 'user' 
+});
+db.trip.hasMany(db.review, { 
+  foreignKey: 'tripId', 
+  as: 'reviews' 
+});
+db.review.belongsTo(db.trip, { 
+  foreignKey: 'tripId', 
+  as: 'trip' 
+});
 
 db.ROLES = ['user', 'admin', 'moderator'];
 
