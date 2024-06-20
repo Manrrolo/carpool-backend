@@ -3,24 +3,10 @@ name: CI/CD
 on:
   pull_request:
   push:
+    branches:
+      - main
 
 jobs:
-  # Commented out the linter job
-  # lint:
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-
-  #     - name: Install dependencies
-  #       working-directory: ./carpool-app 
-  #       run: npm install
-
-  #     - name: Run ESLint
-  #       working-directory: ./carpool-app 
-  #       run: npx eslint .
-
   test:
     runs-on: ubuntu-latest
 
@@ -48,8 +34,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Deploy to Render
-        env:
-          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Copy files to EC2
         run: |
-          curl -X POST "$deploy_url"
+          scp -r -o StrictHostKeyChecking=no . ubuntu@ec2-34-196-39-24.compute-1.amazonaws.com:/home/ubuntu/carpool-backend
+
+      - name: SSH into EC2 and deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@ec2-34-196-39-24.compute-1.amazonaws.com << 'EOF'
+          cd /home/ubuntu/carpool-backend
+          docker-compose down
+          docker-compose up --build -d
+          EOF
