@@ -25,4 +25,6 @@ module.exports = function setupUserRoutes(app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.adminBoard,
   );
+
+  app.get("/api/perfil/:userId", [authJwt.verifyToken], controller.getProfile);
 };
