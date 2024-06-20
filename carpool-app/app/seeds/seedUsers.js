@@ -12,7 +12,7 @@ async function seedUsers() {
       email: 'admin@uc.cl',
       phone: '1234567890',
       // roles: 3,
-      roles: 'admin',
+      role: 'admin',
     });
 
     await User.create({
@@ -22,7 +22,7 @@ async function seedUsers() {
       email: 'john.doe@example.com',
       phone: '1234567890',
       // roles: [1, 2],
-      roles: 'driver',
+      role: 'driver',
     });
 
     await User.create({
@@ -30,10 +30,9 @@ async function seedUsers() {
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'jane.doe@example.com',
-      verified: true,
       phone: '0987654321',
       // roles: 1,
-      roles: 'passenger',
+      role: 'passenger',
     });
   } catch (error) {
     console.error('Error seeding users:', error);
