@@ -1,6 +1,7 @@
 // app/controllers/publication.controller.js
 const db = require('../models');
 const Publication = db.publication;
+const Trip = db.trip;
 
 // GET todas las publicaciones
 exports.getAllPublications = async (req, res) => {
@@ -49,7 +50,8 @@ exports.createPublication = async (req, res) => {
 
   try {
     const publication = await Publication.create({ driverId, driverName, origin, destination, availableSeats, cost, status: false, departureDate });
-    res.status(201).send(publication);
+    const trip = await Trip.create({ publicationId: publication.publicationId, userId: driverId, status: 'pending' })
+    res.status(201).send({ publication, trip });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
