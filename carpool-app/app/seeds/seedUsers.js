@@ -6,33 +6,31 @@ const User = db.user;
 async function seedUsers() {
   try {
     await User.create({
+      userId: 'auth0|6671d0d41b6ba4f5d852d017',
       firstName: 'Admin',
-      lastName: 'Admin',
-      password: bcrypt.hashSync('admin', 10),
+      lastName: 'Carpool',
       email: 'admin@uc.cl',
-      verified: true,
       phone: '1234567890',
-      role: 'admin'
+      role: 'admin',
     });
 
     await User.create({
+      userId: 'auth0|667209355ff76c5f6ecc52c0',
       firstName: 'John',
       lastName: 'Doe',
-      password: bcrypt.hashSync('123', 10),
       email: 'john.doe@example.com',
-      verified: true,
       phone: '1234567890',
-      role: 'driver'
+      role: ['passenger', 'driver'],
     });
 
     await User.create({
+      userId: 'auth0|6672097fdff67714af259298',
       firstName: 'Jane',
       lastName: 'Doe',
-      password: bcrypt.hashSync('123', 10),
       email: 'jane.doe@example.com',
       verified: true,
       phone: '0987654321',
-      role: 'passenger'
+      role: 'passenger',
     });
   } catch (error) {
     console.error('Error seeding users:', error);
