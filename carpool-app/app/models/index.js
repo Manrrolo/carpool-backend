@@ -83,21 +83,21 @@ db.trip.belongsTo(db.publication, {
   foreignKey: 'publicationId',
   as: 'publication',
 });
-db.user.hasMany(db.review, { 
-  foreignKey: 'userId', 
-  as: 'reviews' 
+db.user.hasMany(db.review, {
+  foreignKey: 'userId',
+  as: 'reviews'
 });
-db.review.belongsTo(db.user, { 
-  foreignKey: 'userId', 
-  as: 'user' 
+db.review.belongsTo(db.user, {
+  foreignKey: 'userId',
+  as: 'user'
 });
-db.trip.hasMany(db.review, { 
-  foreignKey: 'tripId', 
-  as: 'reviews' 
+db.trip.hasMany(db.review, {
+  foreignKey: 'tripId',
+  as: 'reviews'
 });
-db.review.belongsTo(db.trip, { 
-  foreignKey: 'tripId', 
-  as: 'trip' 
+db.review.belongsTo(db.trip, {
+  foreignKey: 'tripId',
+  as: 'trip'
 });
 
 db.ROLES = ['user', 'admin', 'moderator'];
