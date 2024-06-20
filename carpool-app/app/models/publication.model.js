@@ -6,12 +6,16 @@ module.exports = (sequelize, Sequelize) => {
       autoIncrement: true,
     },
     driverId: {
-      type: Sequelize.STRING,
+      type: Sequelize.INTEGER,
       allowNull: false,
       references: {
         model: 'users',
         key: 'userId',
       },
+    },
+    driverName: {
+      type: Sequelize.STRING(255),
+      allowNull: false,
     },
     origin: {
       type: Sequelize.STRING(255),
@@ -31,6 +35,10 @@ module.exports = (sequelize, Sequelize) => {
     },
     status: {
       type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    departureDate: {
+      type: Sequelize.DATE,
       allowNull: false,
     },
   });
