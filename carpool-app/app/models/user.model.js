@@ -16,6 +16,13 @@ module.exports = (sequelize, Sequelize) => {
     phone: {
       type: Sequelize.STRING,
     },
+    role: {
+      type: Sequelize.STRING,
+      references: {
+        model: 'roles',
+        key: 'name',
+      },
+    }
   });
 
   return User;

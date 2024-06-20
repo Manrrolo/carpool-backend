@@ -15,7 +15,8 @@ exports.signup = (req, res) => {
     lastName: req.body.lastName,
     email: req.body.email,
     phone: req.body.phone,
-    createdAt: new Date(),
+    role: 'passenger',
+    // createdAt: new Date(),
   })
     .then((user) => {
       if (req.body.roles) {
