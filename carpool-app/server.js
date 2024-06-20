@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const db = require('./app/models');
-const seedRoles = require('./app/seeds/seedRoles'); // Importar la semilla de roles
+const seedRoles = require('./app/seeds/seedRoles');
 const seedUsers = require('./app/seeds/seedUsers');
 const seedPublications = require('./app/seeds/seedPublications');
 const seedRequests = require('./app/seeds/seedRequests');

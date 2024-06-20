@@ -6,7 +6,7 @@ module.exports = (sequelize, Sequelize) => {
       autoIncrement: true,
     },
     driverId: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
       allowNull: false,
       references: {
         model: 'users',

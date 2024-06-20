@@ -20,7 +20,7 @@ async function seedUsers() {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       phone: '1234567890',
-      role: ['passenger', 'driver'],
+      role: 'driver',
     });
 
     await User.create({
@@ -28,7 +28,6 @@ async function seedUsers() {
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'jane.doe@example.com',
-      verified: true,
       phone: '0987654321',
       role: 'passenger',
     });
