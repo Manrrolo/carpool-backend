@@ -1,3 +1,4 @@
+const VehicleController = require('../app/controllers/vehicle.controller');
 const httpMocks = require('node-mocks-http');
 
 // Mock the database models

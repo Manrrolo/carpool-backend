@@ -1,3 +1,5 @@
+// app/controllers/publication.controller.js
+const db = require('../models');
 const Publication = db.publication;
 
 // GET todas las publicaciones
