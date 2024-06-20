@@ -55,29 +55,45 @@ const isAdmin = (req, res, next) => {
   });
 };
 
-const isDriver = (req, res, next) => {
-  User.findByPk(req.userId).then((user) => {
-    if (user && user.role === 'driver') {
-      next();
-      return;
-    }
-    res.status(403).send({
-      message: 'Require Driver Role!',
-    });
-  });
+const checkRole = (role) => {
+  return (req, res, next) => {
+    User.findByPk(req.userId, {
+      include: [
+        {
+          model: db.role,
+          as: 'roles',
+        },
+      ],
+    })
+      .then((user) => {
+        if (!user) {
+          res.status(404).send({
+            message: 'User not found!',
+          });
+          return;
+        }
+
+        const roles = user.roles.map((role) => role.name);
+
+        if (roles.includes(role)) {
+          next();
+          return;
+        }
+
+        res.status(403).send({
+          message: `Require ${role} Role!`,
+        });
+      })
+      .catch((err) => {
+        res.status(500).send({
+          message: err.message,
+        });
+      });
+  };
 };
 
-const isPassenger = (req, res, next) => {
-  User.findByPk(req.userId).then((user) => {
-    if (user && user.role === 'passenger') {
-      next();
-      return;
-    }
-    res.status(403).send({
-      message: 'Require Passenger Role!',
-    });
-  });
-};
+const isDriver = checkRole('driver');
+const isPassenger = checkRole('passenger');
 
 const authJwt = {
   verifyToken,
