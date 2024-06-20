@@ -17,6 +17,9 @@ module.exports = function setupTripRoutes(app) {
   // obtener trips de una publication (driver)
   app.get('/api/trips/publication/:publicationId', [authJwt.verifyToken, authJwt.isDriver], controller.getTripsForPublication);
 
+  // obtener info de trip (estado, pasajeros, driver)
+  app.get('/api/trips/info/:tripId', [authJwt.verifyToken], controller.getInfoOfTrip);
+
   // obtener el trip de driver de una publicacion (solo el propio driver)
   app.get('/api/trips/driver/publication/:publicationId', [authJwt.verifyToken, authJwt.isDriver], controller.getDriverTripOfPublication);
 

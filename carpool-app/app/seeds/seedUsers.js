@@ -11,6 +11,7 @@ async function seedUsers() {
       lastName: 'Carpool',
       email: 'admin@uc.cl',
       phone: '1234567890',
+      // roles: 3,
       role: 'admin',
     });
 
@@ -20,6 +21,7 @@ async function seedUsers() {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       phone: '1234567890',
+      // roles: [1, 2],
       role: 'driver',
     });
 
@@ -29,6 +31,7 @@ async function seedUsers() {
       lastName: 'Doe',
       email: 'jane.doe@example.com',
       phone: '0987654321',
+      // roles: 1,
       role: 'passenger',
     });
   } catch (error) {

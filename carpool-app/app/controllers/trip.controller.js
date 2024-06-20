@@ -3,6 +3,7 @@ const Trip = db.trip;
 const Publication = db.publication;
 const Request = db.request;
 const { DataTypes, Op, where } = require('sequelize');
+const User = db.user;
 
 // GET all trips for a driver
 exports.getAllTripsForDriver = async (req, res) => {
@@ -51,6 +52,41 @@ exports.getTripsForPublication = async (req, res) => {
             res.status(500).send(err.message);
         })
 };
+
+// GET info of trip (passengers, driver, status)
+exports.getInfoOfTrip = async (req, res) => {
+  try {
+    const tripId = req.params.tripId
+    const trip = await Trip.findByPk(tripId);
+    const publication = await Publication.findByPk(trip.publicationId);
+    const status = trip.status;
+    const passengersTrips = await Trip.findAll({
+      attributes: ["status"],
+      where: {
+        userId: { [Op.ne]: publication.driverId},
+        [Op.or]: [{ status: 'in progress'}, { status: 'completed'}]
+      },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ["firstName", "lastName"],
+        }
+      ]
+    });
+    console.log(publication.driverId);
+    const driver = await User.findByPk(publication.driverId);
+    res.status(200).send( {
+      origin: publication.origin,
+      destination: publication.destination,
+      departureDateTime: trip.departureDateTime,
+      statusTrip: status,
+      driver: {firstName: driver.firstName, lastName: driver.lastName},
+      passengers: passengersTrips });
+  } catch (err) {
+    res.status(500).send( { message: err.message});
+  }
+}
 
 // GET driver trip of a publication, only driver
 exports.getDriverTripOfPublication = async (req, res) => {
