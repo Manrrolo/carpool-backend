@@ -13,10 +13,13 @@ jest.mock('../app/models', () => ({
   },
   user: {
     findByPk: jest.fn(),
+  },
+  trip: {
+    create: jest.fn(),
   }
 }));
 
-const { publication: Publication } = require('../app/models');
+const { publication: Publication, trip: Trip } = require('../app/models');
 
 describe('Publication Controller', () => {
   afterEach(() => {
@@ -144,7 +147,7 @@ describe('Publication Controller', () => {
   });
 
   describe('createPublication', () => {
-    it('should create a new publication', async () => {
+    it('should create a new publication and a new trip', async () => {
       const req = httpMocks.createRequest({
         body: {
           origin: 'Origin',
@@ -158,11 +161,15 @@ describe('Publication Controller', () => {
       });
       const res = httpMocks.createResponse();
       res.send = jest.fn();
-
-      Publication.create.mockResolvedValue({ publicationId: 1 });
-
+  
+      const mockPublication = { publicationId: 1, origin: 'Origin', destination: 'Destination', availableSeats: 3, cost: 100, driverName: 'John Doe', departureDate: new Date() };
+      const mockTrip = { tripId: 1, publicationId: 1, userId: 1, status: 'pending' };
+  
+      Publication.create.mockResolvedValue(mockPublication);
+      Trip.create.mockResolvedValue(mockTrip);
+  
       await PublicationController.createPublication(req, res);
-
+  
       expect(Publication.create).toHaveBeenCalledWith({
         driverId: 1,
         driverName: 'John Doe',
@@ -173,8 +180,15 @@ describe('Publication Controller', () => {
         status: false,
         departureDate: expect.any(Date)
       });
+  
+      expect(Trip.create).toHaveBeenCalledWith({
+        publicationId: mockPublication.publicationId,
+        userId: 1,
+        status: 'pending'
+      });
+  
       expect(res.statusCode).toBe(201);
-      expect(res.send).toHaveBeenCalledWith({ publicationId: 1 });
+      expect(res.send).toHaveBeenCalledWith({ publication: mockPublication, trip: mockTrip });
     });
 
     it('should handle errors', async () => {
