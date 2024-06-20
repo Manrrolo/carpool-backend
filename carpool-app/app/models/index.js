@@ -25,11 +25,15 @@ db.trip = require('./trip.model')(sequelize, Sequelize);
 db.review = require('./review.model')(sequelize, Sequelize);
 
 // Define relationships
-db.role.belongsToMany(db.user, {
-  through: 'user_roles',
-});
 db.user.belongsToMany(db.role, {
   through: 'user_roles',
+  as: 'roles',
+  foreignKey: 'userId',
+});
+db.role.belongsToMany(db.user, {
+  through: 'user_roles',
+  as: 'users',
+  foreignKey: 'roleId',
 });
 db.publication.belongsTo(db.user, {
   foreignKey: 'driverId',
@@ -41,12 +45,12 @@ db.user.hasMany(db.publication, {
 });
 db.user.hasMany(db.vehicle, {
   foreignKey: 'userId',
-  as: 'vehicles'
+  as: 'vehicles',
 });
 db.vehicle.belongsTo(db.user, {
   foreignKey: 'userId',
-  as: 'driver'
-})
+  as: 'driver',
+});
 db.request.belongsTo(db.publication, {
   foreignKey: 'publicationId',
   as: 'publication',
@@ -66,7 +70,7 @@ db.user.hasMany(db.request, {
 db.user.hasMany(db.trip, {
   foreignKey: 'userId',
   as: 'trips',
-})
+});
 db.trip.belongsTo(db.user, {
   foreignKey: 'userId',
   as: 'user',

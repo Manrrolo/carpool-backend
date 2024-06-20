@@ -6,25 +6,25 @@ async function seedTrips() {
   try {
     await Trip.create({
       publicationId: 1,
-      userId: 2,
-      status: 'pending',
-    });
-
-    await Trip.create({
-      publicationId: 1,
-      userId: 3,
-      status: 'pending',
-    });
-
-    await Trip.create({
-      publicationId: 3,
-      userId: 2,
+      userId: 'auth0|667209355ff76c5f6ecc52c0',
       status: 'pending',
     });
 
     await Trip.create({
       publicationId: 2,
-      userId: 2,
+      userId: 'auth0|6672097fdff67714af259298',
+      status: 'pending',
+    });
+
+    await Trip.create({
+      publicationId: 3,
+      userId: 'auth0|6672097fdff67714af259298',
+      status: 'pending',
+    });
+
+    await Trip.create({
+      publicationId: 2,
+      userId: 'auth0|667209355ff76c5f6ecc52c0',
       status: 'pending',
     })
   } catch (error) {
