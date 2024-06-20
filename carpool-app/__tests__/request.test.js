@@ -12,10 +12,13 @@ jest.mock('../app/models', () => ({
   },
   publication: {
     findAll: jest.fn(),
+  },
+  trip: {
+    create: jest.fn(),
   }
 }));
 
-const { request: Request, publication: Publication } = require('../app/models');
+const { request: Request, publication: Publication, trip: Trip } = require('../app/models');
 
 describe('Request Controller', () => {
   afterEach(() => {
@@ -286,6 +289,8 @@ describe('Request Controller', () => {
 
       Request.findByPk.mockResolvedValue(mockRequest);
       Request.update.mockResolvedValue([1]);
+      Trip.create.mockResolvedValue({ tripId: 1, publicationId: 1, userId: 2, status: 'pending' });
+
 
       await RequestController.updateRequestStatus(req, res);
 

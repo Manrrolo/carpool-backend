@@ -5,11 +5,13 @@ require('dotenv').config();
 
 const app = express();
 
-const corsOptions = {
-  origin: 'http://localhost:8081',
-};
+// const corsOptions = {
+//   origin: 'http://localhost:8081',
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+
+app.use(cors());
 
 // parse requests of content-type - application/json
 app.use(express.json());
@@ -40,7 +42,7 @@ async function initializeDatabase() {
   }
 }
 
-initializeDatabase()
+initializeDatabase();
 
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);

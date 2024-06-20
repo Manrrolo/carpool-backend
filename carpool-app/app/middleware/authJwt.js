@@ -1,60 +1,80 @@
 const jwt = require('jsonwebtoken');
-const config = require('../config/auth.config.js');
+const jwksClient = require('jwks-rsa');
 const db = require('../models');
 const User = db.user;
+require('dotenv').config();
+
+const client = jwksClient({
+  jwksUri: process.env.AUTH0_JWKS_URI,
+});
+
+function getKey(header, callback) {
+  client.getSigningKey(header.kid, function (err, key) {
+    if (err) {
+      return callback(err);
+    }
+    const signingKey = key.publicKey || key.rsaPublicKey;
+    callback(null, signingKey);
+  });
+}
 
 const verifyToken = (req, res, next) => {
-  let token = req.headers["x-access-token"];
+  let token = req.headers['authorization'];
 
   if (!token) {
     return res.status(403).send({
-      message: "No token provided!"
+      message: 'No token provided!',
     });
   }
 
-  jwt.verify(token.split(" ")[1], config.secret, (err, decoded) => {
+  token = token.split(' ')[1];
+
+  jwt.verify(token, getKey, (err, decoded) => {
     if (err) {
+      console.error('Error verifying token:', err);
       return res.status(401).send({
-        message: "Unauthorized!"
+        message: 'Unauthorized!',
       });
     }
-    req.userId = decoded.id;
+    req.userId = decoded.sub;
+    req.decoded = decoded;
+    console.log('Decoded JWT:', decoded);
     next();
   });
 };
 
 const isAdmin = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    if (user.role === 'admin') {
+  User.findByPk(req.userId).then((user) => {
+    if (user && user.role === 'admin') {
       next();
       return;
     }
     res.status(403).send({
-      message: "Require Admin Role!"
+      message: 'Require Admin Role!',
     });
   });
 };
 
 const isDriver = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    if (user.role === 'driver') {
+  User.findByPk(req.userId).then((user) => {
+    if (user && user.role === 'driver') {
       next();
       return;
     }
     res.status(403).send({
-      message: "Require Driver Role!"
+      message: 'Require Driver Role!',
     });
   });
 };
 
 const isPassenger = (req, res, next) => {
-  User.findByPk(req.userId).then(user => {
-    if (user.role === 'passenger') {
+  User.findByPk(req.userId).then((user) => {
+    if (user && user.role === 'passenger') {
       next();
       return;
     }
     res.status(403).send({
-      message: "Require Passenger Role!"
+      message: 'Require Passenger Role!',
     });
   });
 };
@@ -63,6 +83,7 @@ const authJwt = {
   verifyToken,
   isAdmin,
   isDriver,
-  isPassenger
+  isPassenger,
 };
+
 module.exports = authJwt;
