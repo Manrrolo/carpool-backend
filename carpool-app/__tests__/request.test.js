@@ -12,6 +12,8 @@ jest.mock('../app/models', () => ({
   },
   publication: {
     findAll: jest.fn(),
+    findByPk: jest.fn(),
+    update: jest.fn()
   },
   trip: {
     create: jest.fn(),
@@ -145,15 +147,53 @@ describe('Request Controller', () => {
       const res = httpMocks.createResponse();
       res.send = jest.fn();
 
-      Request.findAll.mockResolvedValue([{ requestId: 1 }, { requestId: 2 }]);
+      const mockPublication = {
+        requests: [{ requestId: 1 }, { requestId: 2 }],
+        availableSeats: 3
+      };
+
+      Publication.findByPk.mockResolvedValue(mockPublication);
 
       await RequestController.getRequestsForPublication(req, res);
 
-      expect(Request.findAll).toHaveBeenCalledWith({
-        where: { publicationId: 1 }
+      expect(Publication.findByPk).toHaveBeenCalledWith(1, {
+        include: [
+          {
+            model: Request,
+            as: 'requests'
+          }
+        ]
       });
       expect(res.statusCode).toBe(200);
-      expect(res.send).toHaveBeenCalledWith([{ requestId: 1 }, { requestId: 2 }]);
+      expect(res.send).toHaveBeenCalledWith({
+        requests: mockPublication.requests,
+        availableSeats: mockPublication.availableSeats
+      });
+    });
+
+    it('should return 404 if publication is not found', async () => {
+      const req = httpMocks.createRequest({
+        params: {
+          publicationId: 1,
+        }
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      Publication.findByPk.mockResolvedValue(null);
+
+      await RequestController.getRequestsForPublication(req, res);
+
+      expect(Publication.findByPk).toHaveBeenCalledWith(1, {
+        include: [
+          {
+            model: Request,
+            as: 'requests'
+          }
+        ]
+      });
+      expect(res.statusCode).toBe(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Publication not found.' });
     });
 
     it('should return 500 on database error', async () => {
@@ -165,12 +205,17 @@ describe('Request Controller', () => {
       const res = httpMocks.createResponse();
       res.send = jest.fn();
 
-      Request.findAll.mockRejectedValue(new Error('Database error'));
+      Publication.findByPk.mockRejectedValue(new Error('Database error'));
 
       await RequestController.getRequestsForPublication(req, res);
 
-      expect(Request.findAll).toHaveBeenCalledWith({
-        where: { publicationId: 1 }
+      expect(Publication.findByPk).toHaveBeenCalledWith(1, {
+        include: [
+          {
+            model: Request,
+            as: 'requests'
+          }
+        ]
       });
       expect(res.statusCode).toBe(500);
       expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
@@ -227,10 +272,14 @@ describe('Request Controller', () => {
       const res = httpMocks.createResponse();
       res.send = jest.fn();
 
+      const mockPublication = { availableSeats: 3 };
+
+      Publication.findByPk.mockResolvedValue(mockPublication);
       Request.create.mockResolvedValue({ requestId: 1 });
 
       await RequestController.createRequest(req, res);
 
+      expect(Publication.findByPk).toHaveBeenCalledWith(1);
       expect(Request.create).toHaveBeenCalledWith({
         publicationId: 1,
         passengerId: 1,
@@ -239,6 +288,26 @@ describe('Request Controller', () => {
       });
       expect(res.statusCode).toBe(201);
       expect(res.send).toHaveBeenCalledWith({ requestId: 1 });
+    });
+
+    it('should return 400 if no available seats', async () => {
+      const req = httpMocks.createRequest({
+        body: {
+          publicationId: 1,
+          reservationDate: new Date(),
+        },
+        userId: 1,
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      Publication.findByPk.mockResolvedValue({ availableSeats: 0 });
+
+      await RequestController.createRequest(req, res);
+
+      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(res.statusCode).toBe(400);
+      expect(res.send).toHaveBeenCalledWith({ message: 'No available seats.' });
     });
 
     it('should return 500 on database error', async () => {
@@ -252,16 +321,11 @@ describe('Request Controller', () => {
       const res = httpMocks.createResponse();
       res.send = jest.fn();
 
-      Request.create.mockRejectedValue(new Error('Database error'));
+      Publication.findByPk.mockRejectedValue(new Error('Database error'));
 
       await RequestController.createRequest(req, res);
 
-      expect(Request.create).toHaveBeenCalledWith({
-        publicationId: 1,
-        passengerId: 1,
-        reservationDate: expect.any(Date),
-        status: 'pending',
-      });
+      expect(Publication.findByPk).toHaveBeenCalledWith(1);
       expect(res.statusCode).toBe(500);
       expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
     });
@@ -283,14 +347,17 @@ describe('Request Controller', () => {
 
       const mockRequest = {
         publication: {
+          publicationId: 1,
           driverId: 1,
+          availableSeats: 3
         },
+        passengerId: 2
       };
 
       Request.findByPk.mockResolvedValue(mockRequest);
       Request.update.mockResolvedValue([1]);
       Trip.create.mockResolvedValue({ tripId: 1, publicationId: 1, userId: 2, status: 'pending' });
-
+      Publication.update.mockResolvedValue([1]);
 
       await RequestController.updateRequestStatus(req, res);
 
@@ -298,6 +365,10 @@ describe('Request Controller', () => {
         include: [{ model: Publication, as: 'publication' }],
       });
       expect(Request.update).toHaveBeenCalledWith({ status: 'accepted' }, { where: { requestId: 1 } });
+      expect(Publication.update).toHaveBeenCalledWith(
+        { availableSeats: mockRequest.publication.availableSeats - 1 },
+        { where: { publicationId: mockRequest.publication.publicationId } }
+      );
       expect(res.statusCode).toBe(200);
       expect(res.send).toHaveBeenCalledWith({ message: 'Request status was updated successfully.' });
     });

@@ -6,7 +6,7 @@ async function seedPublications() {
   try {
     await Publication.create({
       driverId: 'auth0|667209355ff76c5f6ecc52c0',
-      driverName: 'John Doe',
+      // driverName: 'John Doe',
       origin: 'Origin Address 1',
       destination: 'Destination Address 1',
       availableSeats: 3,
@@ -17,7 +17,7 @@ async function seedPublications() {
 
     await Publication.create({
       driverId: 'auth0|6672097fdff67714af259298',
-      driverName: 'Jane Doe',
+      // driverName: 'Jane Doe',
       origin: 'Origin Address 2',
       destination: 'Destination Address 2',
       availableSeats: 4,
@@ -28,7 +28,7 @@ async function seedPublications() {
 
     await Publication.create({
       driverId: 'auth0|667209355ff76c5f6ecc52c0',
-      driverName: 'John Doe',
+      // driverName: 'John Doe',
       origin: 'Origin Address 3',
       destination: 'Destination Address 3',
       availableSeats: 2,

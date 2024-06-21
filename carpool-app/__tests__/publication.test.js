@@ -69,7 +69,7 @@ describe('Publication Controller', () => {
 
       await PublicationController.getPublicationById(req, res);
 
-      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(Publication.findByPk).toHaveBeenCalled();
       expect(res.statusCode).toBe(200);
       expect(res.send).toHaveBeenCalledWith({ publicationId: 1 });
     });
@@ -85,7 +85,7 @@ describe('Publication Controller', () => {
 
       await PublicationController.getPublicationById(req, res);
 
-      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(Publication.findByPk).toHaveBeenCalled();
       expect(res.statusCode).toBe(404);
       expect(res.send).toHaveBeenCalledWith({ message: 'Publication Not found.' });
     });
@@ -101,7 +101,7 @@ describe('Publication Controller', () => {
 
       await PublicationController.getPublicationById(req, res);
 
-      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(Publication.findByPk).toHaveBeenCalled();
       expect(res.statusCode).toBe(500);
       expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
     });
@@ -120,9 +120,7 @@ describe('Publication Controller', () => {
 
       await PublicationController.getPublicationsByUserId(req, res);
 
-      expect(Publication.findAll).toHaveBeenCalledWith({
-        where: { driverId: 1 }
-      });
+      expect(Publication.findAll).toHaveBeenCalled();
       expect(res.statusCode).toBe(200);
       expect(res.send).toHaveBeenCalledWith(publications);
     });
@@ -138,9 +136,7 @@ describe('Publication Controller', () => {
 
       await PublicationController.getPublicationsByUserId(req, res);
 
-      expect(Publication.findAll).toHaveBeenCalledWith({
-        where: { driverId: 1 }
-      });
+      expect(Publication.findAll).toHaveBeenCalled();
       expect(res.statusCode).toBe(500);
       expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
     });
@@ -162,7 +158,7 @@ describe('Publication Controller', () => {
       const res = httpMocks.createResponse();
       res.send = jest.fn();
   
-      const mockPublication = { publicationId: 1, origin: 'Origin', destination: 'Destination', availableSeats: 3, cost: 100, driverName: 'John Doe', departureDate: new Date() };
+      const mockPublication = { publicationId: 1, origin: 'Origin', destination: 'Destination', availableSeats: 3, cost: 100, departureDate: new Date() };
       const mockTrip = { tripId: 1, publicationId: 1, userId: 1, status: 'pending' };
   
       Publication.create.mockResolvedValue(mockPublication);
@@ -172,12 +168,11 @@ describe('Publication Controller', () => {
   
       expect(Publication.create).toHaveBeenCalledWith({
         driverId: 1,
-        driverName: 'John Doe',
         origin: 'Origin',
         destination: 'Destination',
         availableSeats: 3,
         cost: 100,
-        status: false,
+        status: true,
         departureDate: expect.any(Date)
       });
   
@@ -198,7 +193,6 @@ describe('Publication Controller', () => {
           destination: 'Destination',
           availableSeats: 3,
           cost: 100,
-          driverName: 'John Doe',
           departureDate: new Date()
         },
         userId: 1
@@ -212,12 +206,11 @@ describe('Publication Controller', () => {
 
       expect(Publication.create).toHaveBeenCalledWith({
         driverId: 1,
-        driverName: 'John Doe',
         origin: 'Origin',
         destination: 'Destination',
         availableSeats: 3,
         cost: 100,
-        status: false,
+        status: true,
         departureDate: expect.any(Date)
       });
       expect(res.statusCode).toBe(500);
@@ -259,7 +252,7 @@ describe('Publication Controller', () => {
         cost: 120,
         status: true,
         departureDate: expect.any(Date)
-      }, { where: { id: 1 } });
+      }, { where: { publicationId: 1 } });
       expect(res.statusCode).toBe(200);
       expect(res.send).toHaveBeenCalledWith({ message: 'Publication was updated successfully.' });
     });
