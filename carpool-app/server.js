@@ -26,6 +26,7 @@ const seedPublications = require('./app/seeds/seedPublications');
 const seedRequests = require('./app/seeds/seedRequests');
 const seedVehicles = require('./app/seeds/seedVehicles');
 const seedTrips = require('./app/seeds/seedTrips');
+const seedReviews = require('./app/seeds/seedReviews');
 
 async function initializeDatabase() {
   try {
@@ -37,6 +38,7 @@ async function initializeDatabase() {
     await seedRequests();
     await seedVehicles();
     await seedTrips();
+    await seedReviews();
   } catch (error) {
     console.error('Unable to initialize database:', error);
   }
