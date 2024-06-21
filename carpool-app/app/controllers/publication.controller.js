@@ -45,11 +45,13 @@ exports.getPublicationsByUserId = async (req, res) => {
 
 // POST crear una nueva publicación (solo para drivers)
 exports.createPublication = async (req, res) => {
-  const { origin, destination, availableSeats, cost, driverName, departureDate } = req.body;
+  // const { origin, destination, availableSeats, cost, driverName, departureDate } = req.body;
+  const { origin, destination, availableSeats, cost, departureDate } = req.body;
   const driverId = req.userId;
 
   try {
-    const publication = await Publication.create({ driverId, driverName, origin, destination, availableSeats, cost, status: false, departureDate });
+    // const publication = await Publication.create({ driverId, driverName, origin, destination, availableSeats, cost, status: false, departureDate });
+    const publication = await Publication.create({ driverId, origin, destination, availableSeats, cost, status: false, departureDate });
     const trip = await Trip.create({ publicationId: publication.publicationId, userId: driverId, status: 'pending' })
     res.status(201).send({ publication, trip });
   } catch (err) {

@@ -13,10 +13,10 @@ module.exports = (sequelize, Sequelize) => {
         key: 'userId',
       },
     },
-    driverName: {
-      type: Sequelize.STRING(255),
-      allowNull: false,
-    },
+    // driverName: {
+    //   type: Sequelize.STRING(255),
+    //   allowNull: false,
+    // },
     origin: {
       type: Sequelize.STRING(255),
       allowNull: false,

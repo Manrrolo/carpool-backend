@@ -1,4 +1,3 @@
-
 const PublicationController = require('../app/controllers/publication.controller');
 const httpMocks = require('node-mocks-http');
 
@@ -154,25 +153,23 @@ describe('Publication Controller', () => {
           destination: 'Destination',
           availableSeats: 3,
           cost: 100,
-          driverName: 'John Doe',
           departureDate: new Date()
         },
         userId: 1
       });
       const res = httpMocks.createResponse();
       res.send = jest.fn();
-  
-      const mockPublication = { publicationId: 1, origin: 'Origin', destination: 'Destination', availableSeats: 3, cost: 100, driverName: 'John Doe', departureDate: new Date() };
+
+      const mockPublication = { publicationId: 1, origin: 'Origin', destination: 'Destination', availableSeats: 3, cost: 100, departureDate: new Date() };
       const mockTrip = { tripId: 1, publicationId: 1, userId: 1, status: 'pending' };
-  
+
       Publication.create.mockResolvedValue(mockPublication);
       Trip.create.mockResolvedValue(mockTrip);
-  
+
       await PublicationController.createPublication(req, res);
-  
+
       expect(Publication.create).toHaveBeenCalledWith({
         driverId: 1,
-        driverName: 'John Doe',
         origin: 'Origin',
         destination: 'Destination',
         availableSeats: 3,
@@ -180,13 +177,13 @@ describe('Publication Controller', () => {
         status: false,
         departureDate: expect.any(Date)
       });
-  
+
       expect(Trip.create).toHaveBeenCalledWith({
         publicationId: mockPublication.publicationId,
         userId: 1,
         status: 'pending'
       });
-  
+
       expect(res.statusCode).toBe(201);
       expect(res.send).toHaveBeenCalledWith({ publication: mockPublication, trip: mockTrip });
     });
@@ -198,7 +195,6 @@ describe('Publication Controller', () => {
           destination: 'Destination',
           availableSeats: 3,
           cost: 100,
-          driverName: 'John Doe',
           departureDate: new Date()
         },
         userId: 1
@@ -212,7 +208,6 @@ describe('Publication Controller', () => {
 
       expect(Publication.create).toHaveBeenCalledWith({
         driverId: 1,
-        driverName: 'John Doe',
         origin: 'Origin',
         destination: 'Destination',
         availableSeats: 3,
