@@ -8,6 +8,7 @@ async function seedTrips() {
       publicationId: 1,
       userId: 'auth0|667209355ff76c5f6ecc52c0',
       status: 'in progress',
+      departureDateTime: new Date(Date.now() + 6 * 60 * 60 * 1000)
     });
 
     await Trip.create({
@@ -32,12 +33,15 @@ async function seedTrips() {
       publicationId: 1,
       userId: 'auth0|6671d0d41b6ba4f5d852d017',
       status: 'completed',
+      departureDateTime: new Date(Date.now() + 7 * 60 * 60 * 1000),
+      arrivalDateTime: new Date(Date.now() + 8 * 60 * 60 * 1000)
     })
 
     await Trip.create({
       publicationId: 1,
       userId: 'auth0|6672097fdff67714af259298',
-      status: 'in progress'
+      status: 'in progress',
+      departureDateTime: new Date(Date.now() + 8 * 60 * 60 * 1000),
     })
   } catch (error) {
     console.error('Error seeding trips:', error);
