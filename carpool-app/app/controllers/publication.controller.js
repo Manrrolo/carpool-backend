@@ -1,12 +1,16 @@
-// app/controllers/publication.controller.js
 const db = require('../models');
 const Publication = db.publication;
+const User = db.user;
 const Trip = db.trip;
 
 // GET todas las publicaciones
 exports.getAllPublications = async (req, res) => {
   try {
-    const publications = await Publication.findAll();
+    const publications = await Publication.findAll({
+      include: [
+        { model: User, as: 'driver', attributes: ['firstName', 'lastName'] }
+      ]
+    });
     res.status(200).send(publications);
   } catch (err) {
     res.status(500).send({ message: err.message });
@@ -15,17 +19,21 @@ exports.getAllPublications = async (req, res) => {
 
 // GET publicación por ID
 exports.getPublicationById = async (req, res) => {
-    try {
-      const id = req.params.id;
-      const publication = await Publication.findByPk(id);
-      if (!publication) {
-        return res.status(404).send({ message: "Publication Not found." });
-      }
-
-      res.status(200).send(publication);
-    } catch (err) {
-      res.status(500).send({ message: err.message });
+  try {
+    const id = req.params.id;
+    const publication = await Publication.findByPk(id, {
+      include: [
+        { model: User, as: 'driver', attributes: ['firstName', 'lastName'] }
+      ]
+    });
+    if (!publication) {
+      return res.status(404).send({ message: "Publication Not found." });
     }
+
+    res.status(200).send(publication);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
 
 // GET publicaciones de usuario
@@ -35,7 +43,10 @@ exports.getPublicationsByUserId = async (req, res) => {
     const publications = await Publication.findAll({
       where: {
         driverId: userId
-      }
+      },
+      include: [
+        { model: User, as: 'driver', attributes: ['firstName', 'lastName'] }
+      ]
     });
     res.status(200).send(publications);
   } catch (err) {
@@ -45,13 +56,11 @@ exports.getPublicationsByUserId = async (req, res) => {
 
 // POST crear una nueva publicación (solo para drivers)
 exports.createPublication = async (req, res) => {
-  // const { origin, destination, availableSeats, cost, driverName, departureDate } = req.body;
   const { origin, destination, availableSeats, cost, departureDate } = req.body;
   const driverId = req.userId;
 
   try {
-    // const publication = await Publication.create({ driverId, driverName, origin, destination, availableSeats, cost, status: false, departureDate });
-    const publication = await Publication.create({ driverId, origin, destination, availableSeats, cost, status: false, departureDate });
+    const publication = await Publication.create({ driverId, origin, destination, availableSeats, cost, status: true, departureDate });
     const trip = await Trip.create({ publicationId: publication.publicationId, userId: driverId, status: 'pending' })
     res.status(201).send({ publication, trip });
   } catch (err) {
@@ -75,7 +84,7 @@ exports.updatePublication = async (req, res) => {
     }
 
     const [num] = await Publication.update({ origin, destination, availableSeats, cost, status, departureDate }, {
-      where: { id }
+      where: { publicationId: id }
     });
     if (num === 1) {
       res.status(200).send({ message: "Publication was updated successfully." });
@@ -102,7 +111,7 @@ exports.deletePublication = async (req, res) => {
     }
 
     const num = await Publication.destroy({
-      where: { id }
+      where: { publicationId: id }
     });
     if (num === 1) {
       res.status(200).send({ message: "Publication was deleted successfully!" });
