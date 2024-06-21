@@ -39,14 +39,23 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Copy files to EC2
-        run: |
-          scp -r -o StrictHostKeyChecking=no . ubuntu@ec2-34-196-39-24.compute-1.amazonaws.com:/home/ubuntu/carpool-backend
+      # - name: Copy files to EC2
+      #   run: |
+      #     scp -r -o StrictHostKeyChecking=no . ubuntu@ec2-34-196-39-24.compute-1.amazonaws.com:/home/ubuntu/carpool-backend
 
-      - name: SSH into EC2 and deploy
+      # - name: SSH into EC2 and deploy
+      #   run: |
+      #     ssh -o StrictHostKeyChecking=no ubuntu@ec2-34-196-39-24.compute-1.amazonaws.com << 'EOF'
+      #     cd /home/ubuntu/carpool-backend
+      #     docker-compose down
+      #     docker-compose up --build -d
+      #     EOF
+
+      - name: SSH into EC2, stop Docker containers, pull repository, and start Docker containers
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@ec2-34-196-39-24.compute-1.amazonaws.com << 'EOF'
+          ssh -i /home/tu-usuario/Carpool.pem ubuntu@ip-172-31-25-103 << 'EOF'
           cd /home/ubuntu/carpool-backend
           docker-compose down
+          git pull origin main
           docker-compose up --build -d
           EOF
