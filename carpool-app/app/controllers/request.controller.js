@@ -50,7 +50,14 @@ exports.getRequestsForPublication = async (req, res) => {
       include: [
         {
           model: Request,
-          as: 'requests'
+          as: 'requests',
+          include: [
+            {
+              model: User,
+              as: 'passenger',
+              attributes: ['userId', 'firstName', 'lastName', 'email', 'phone']
+            }
+          ]
         }
       ]
     });
