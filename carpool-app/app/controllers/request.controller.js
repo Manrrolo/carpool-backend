@@ -50,7 +50,14 @@ exports.getRequestsForPublication = async (req, res) => {
       include: [
         {
           model: Request,
-          as: 'requests'
+          as: 'requests',
+          include: [
+            {
+              model: User,
+              as: 'passenger',
+              attributes: ['userId', 'firstName', 'lastName', 'email', 'phone']
+            }
+          ]
         }
       ]
     });
@@ -220,6 +227,93 @@ exports.updateRequestStatus = async (req, res) => {
       }
 
       res.status(200).send({ message: "Request status was updated successfully." });
+    } else {
+      res.status(404).send({ message: `Cannot update Request with id=${requestId}.` });
+    }
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+exports.rejectRequest = async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+    const userId = req.userId;
+
+    // Encuentra la solicitud por ID e incluye la publicación relacionada
+    const request = await Request.findByPk(requestId, {
+      include: [{
+        model: Publication,
+        as: 'publication',
+      }],
+    });
+
+    // Verifica si la solicitud existe
+    if (!request) {
+      return res.status(404).send({ message: `Cannot find Request with id=${requestId}.` });
+    }
+
+    // Verifica si el usuario está autorizado
+    if (request.publication.driverId !== userId) {
+      return res.status(403).send({ message: 'You are not authorized to update the status of this request.' });
+    }
+
+    // Actualiza el estado de la solicitud a 'rejected'
+    const updatedRequest = await Request.update({ status: 'rejected' }, {
+      where: { requestId },
+    });
+
+    if (updatedRequest == 1) {
+      res.status(200).send({ message: "Request rejected successfully." });
+    } else {
+      res.status(404).send({ message: `Cannot update Request with id=${requestId}.` });
+    }
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+exports.acceptRequest = async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+    const userId = req.userId;
+
+    // Encuentra la solicitud por ID e incluye la publicación relacionada
+    const request = await Request.findByPk(requestId, {
+      include: [{
+        model: Publication,
+        as: 'publication',
+      }],
+    });
+
+    // Verifica si la solicitud existe
+    if (!request) {
+      return res.status(404).send({ message: `Cannot find Request with id=${requestId}.` });
+    }
+
+    // Verifica si el usuario está autorizado
+    if (request.publication.driverId !== userId) {
+      return res.status(403).send({ message: 'You are not authorized to update the status of this request.' });
+    }
+
+    // Verifica la disponibilidad de asientos
+    if (request.publication.availableSeats <= 0) {
+      return res.status(400).send({ message: "No available seats to accept the request." });
+    }
+
+    // Actualiza el estado de la solicitud a 'accepted'
+    const updatedRequest = await Request.update({ status: 'accepted' }, {
+      where: { requestId },
+    });
+
+    if (updatedRequest == 1) {
+      // Crea un nuevo viaje y disminuye los asientos disponibles si hay al menos un asiento
+      if (request.publication.availableSeats > 0) {
+        await Trip.create({ publicationId: request.publication.publicationId, userId: request.passengerId, status: 'pending' });
+        await Publication.update({ availableSeats: request.publication.availableSeats - 1 }, { where: { publicationId: request.publication.publicationId } });
+      }
+
+      res.status(200).send({ message: "Request accepted successfully." });
     } else {
       res.status(404).send({ message: `Cannot update Request with id=${requestId}.` });
     }

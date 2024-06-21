@@ -28,6 +28,12 @@ module.exports = function(app) {
   // Actualizar el estado de una solicitud (solo para el driver)
   app.put("/api/requests/status/:requestId", [authJwt.verifyToken, authJwt.isDriver], requests.updateRequestStatus);
 
+  // Aceptar una solicitud (solo para el driver)
+  app.put("/api/requests/accept/:requestId", [authJwt.verifyToken, authJwt.isDriver], requests.acceptRequest);
+
+  // Rechazar una solicitud (solo para el driver)
+  app.put("/api/requests/reject/:requestId", [authJwt.verifyToken, authJwt.isDriver], requests.rejectRequest);
+
   // // Actualizar una solicitud (solo para el passenger)
   // app.put("/api/requests/:requestId", [authJwt.verifyToken], requests.updateRequestByPassenger);
 };

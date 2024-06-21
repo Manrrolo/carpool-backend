@@ -34,6 +34,24 @@ async function seedUsers() {
       // roles: 1,
       role: 'passenger',
     });
+
+    await User.create({
+      userId: 'auth0|6675248501de4d750dcfa352',
+      firstName: 'Alice',
+      lastName: 'Smith',
+      email: 'alice.s@uc.cl',
+      phone: '0987654321',
+      role: 'driver',
+    });
+
+    await User.create({
+      userId: 'auth0|6675237b5aef436d40985d18',
+      firstName: 'Javier',
+      lastName: 'Hall',
+      email: 'javier.h@uc.cl',
+      phone: '0987654321',
+      role: 'passenger',
+    });
   } catch (error) {
     console.error('Error seeding users:', error);
   }

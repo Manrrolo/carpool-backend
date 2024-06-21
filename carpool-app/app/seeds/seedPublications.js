@@ -16,17 +16,6 @@ async function seedPublications() {
     });
 
     await Publication.create({
-      driverId: 'auth0|6672097fdff67714af259298',
-      // driverName: 'Jane Doe',
-      origin: 'Origin Address 2',
-      destination: 'Destination Address 2',
-      availableSeats: 4,
-      cost: 15,
-      status: true,
-      departureDate: new Date(Date.now() + 4 * 60 * 60 * 1000),
-    });
-
-    await Publication.create({
       driverId: 'auth0|667209355ff76c5f6ecc52c0',
       // driverName: 'John Doe',
       origin: 'Origin Address 3',
