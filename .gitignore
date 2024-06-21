@@ -1,5 +1,6 @@
 # Dependencias
 node_modules/
+coverage/
 
 # Archivos de configuración
 .env
