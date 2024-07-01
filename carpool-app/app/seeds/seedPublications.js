@@ -25,6 +25,18 @@ async function seedPublications() {
       status: false,
       departureDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
     });
+
+     await Publication.create({
+       driverId: 'auth0|667209355ff76c5f6ecc52c0',
+       // driverName: 'John Doe',
+        origin: 'Las Condes',
+        destination: 'Campus San Joaquín',
+        availableSeats: 1,
+        cost: 2000,
+        status: true,
+       departureDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
+     });
+
   } catch (error) {
     console.error('Error seeding publications:', error);
   }

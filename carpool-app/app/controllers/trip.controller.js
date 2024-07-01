@@ -2,6 +2,7 @@ const db = require('../models');
 const Trip = db.trip;
 const Publication = db.publication;
 const Request = db.request;
+const Review = db.review;
 const { DataTypes, Op, where } = require('sequelize');
 const User = db.user;
 
@@ -285,3 +286,94 @@ exports.completeTrip = async (req, res) => {
       res.status(500).send({ message: err.message });
     }
   };
+
+ // Helper function to get userId based on groupId
+ const getUserIdFromGroupId = async (tripId, groupId) => {
+   const trip = await Trip.findByPk(tripId, {
+     include: [
+       {
+         model: Publication,
+         as: 'publication',
+         include: [
+           {
+             model: User,
+             as: 'driver',
+           },
+         ],
+       },
+     ],
+   });
+
+   console.log(trip)
+
+   if (!trip) {
+     throw new Error('Trip not found');
+   }
+
+   const passengers = await Trip.findAll({
+     where: {
+       publicationId: trip.publicationId,
+       userId: { [Op.ne]: trip.publication.driverId },
+       [Op.or]: [{ status: 'in progress' }, { status: 'completed' }],
+     },
+     include: [
+       {
+         model: User,
+         as: 'user',
+       },
+     ],
+   });
+
+   const allUsers = [
+     trip.publication.driver,
+     ...passengers.map((pt) => pt.user),
+   ];
+   if (groupId < 0 || groupId >= allUsers.length) {
+     throw new Error('Invalid groupId');
+   }
+   return allUsers[groupId].userId;
+ };
+
+ // GET user profile by tripId and groupId
+ exports.getUserProfileByGroupId = async (req, res) => {
+   try {
+     const { tripId, groupId } = req.params;
+     const userId = await getUserIdFromGroupId(tripId, parseInt(groupId, 10));
+
+     // Buscar el usuario por userId
+     const user = await User.findOne({
+       where: { userId: userId },
+     });
+
+     // Si el usuario no existe, devolver error 404
+     if (!user) {
+       return res
+         .status(404)
+         .send({ message: `User with userId ${userId} not found.` });
+     }
+
+     // Buscar los reviews del usuario
+     const reviews = await Review.findAll({
+       where: { userId: userId },
+     });
+
+     let averageRating = null;
+     // Calcular el rating promedio si el usuario tiene reviews
+     if (reviews.length > 0) {
+       const totalRating = reviews.reduce(
+         (acc, review) => acc + review.rating,
+         0,
+       );
+       averageRating = totalRating / reviews.length;
+     }
+
+     res.status(200).send({
+       user,
+       reviews,
+       averageRating,
+     });
+   } catch (err) {
+     res.status(500).send({ message: err.message });
+   }
+ };
+
