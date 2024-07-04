@@ -320,4 +320,20 @@ exports.acceptRequest = async (req, res) => {
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
+
+  // GET count of pending requests for a publication
+  exports.getPendingRequestsCountForPublication = async (req, res) => {
+    try {
+    const publicationId = req.params.publicationId;
+
+    const pendingRequestsCount = await Request.count({
+      where: { publicationId, status: 'pending' }
+    });
+
+    res.status(200).send({ count: pendingRequestsCount });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
 };

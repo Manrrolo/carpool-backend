@@ -34,6 +34,9 @@ module.exports = function(app) {
   // Rechazar una solicitud (solo para el driver)
   app.put("/api/requests/reject/:requestId", [authJwt.verifyToken, authJwt.isDriver], requests.rejectRequest);
 
+  // Obtener el número de solicitudes pendientes para una publicación específica
+  app.get("/api/requests/pending/count/:publicationId", [authJwt.verifyToken], requests.getPendingRequestsCountForPublication);
+
   // // Actualizar una solicitud (solo para el passenger)
   // app.put("/api/requests/:requestId", [authJwt.verifyToken], requests.updateRequestByPassenger);
 };
