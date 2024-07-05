@@ -238,6 +238,10 @@ exports.startTrip = async (req, res) => {
     });
 
     if (updatedTrip == 1) {
+      await User.update(
+        { inTrip: true },
+        { where: { userId: userId } }
+      );
       res.status(200).send({ message: "Trip started successfully." });
     } else {
       res.status(404).send({ message: `Cannot update Trip with id=${tripId}.` });
@@ -277,9 +281,35 @@ exports.completeTrip = async (req, res) => {
       });
 
       if (updatedTrip == 1) {
+        await User.update(
+        { inTrip: true },
+        { where: { userId: userId } }
+      );
         res.status(200).send({ message: "Trip was completed successfully." });
       } else {
         res.status(404).send({ message: `Cannot update Trip with id=${tripId}.` });
+      }
+    } catch (err) {
+      res.status(500).send({ message: err.message });
+    }
+  };
+
+  exports.getInProgressTripForUser = async (req, res) => {
+    try {
+      const userId = req.params.userId;
+  
+      // Buscar un viaje en progreso para el usuario dado
+      const trip = await Trip.findOne({
+        where: {
+          userId: userId,
+          status: 'in progress',
+        },
+      });
+  
+      if (trip) {
+        res.status(200).send({ tripId: trip.tripId });
+      } else {
+        res.status(404).send({ message: 'No trip in progress found for this user.' });
       }
     } catch (err) {
       res.status(500).send({ message: err.message });

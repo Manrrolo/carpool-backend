@@ -10,18 +10,18 @@ module.exports = function setupReviewRoutes(app) {
     next();
   });
 
-  // Obtener todas las revisiones de un usuario
+  // Obtener todas las reviews de un usuario
   app.get('/api/reviews/user/:userId', [authJwt.verifyToken], controller.getAllReviewsByUser);
 
-  // Obtener todas las revisiones de un viaje
+  // Obtener todas las reviews de un viaje
   app.get('/api/reviews/trip/:tripId', [authJwt.verifyToken], controller.getAllReviewsByTrip);
 
-  // Crear nueva revisión
+  // Crear nueva review
   app.post('/api/reviews', [authJwt.verifyToken], controller.createReview);
 
-  // Actualizar revisión
+  // Actualizar review
   app.patch('/api/reviews/:reviewId', [authJwt.verifyToken], controller.updateReview);
 
-  // Eliminar revisión
+  // Eliminar review
   app.delete('/api/reviews/:reviewId', [authJwt.verifyToken], controller.deleteReview);
 };
