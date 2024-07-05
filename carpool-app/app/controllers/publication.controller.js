@@ -2,6 +2,7 @@ const db = require('../models');
 const Publication = db.publication;
 const User = db.user;
 const Trip = db.trip;
+const Op = db.Sequelize.Op;
 
 // GET todas las publicaciones
 exports.getAllPublications = async (req, res) => {
@@ -16,6 +17,25 @@ exports.getAllPublications = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
+// GET publicaciones filtradas
+exports.getFilteredPublications = async (req, res) => {
+  try {
+    let { origin, destination, date } = req.body;
+    let publications;
+    const startDate = new Date(date).setHours(0,0,0,0);
+    const finalDate = new Date(date).setHours(23,59,59,999);
+
+    if (date == '')
+      publications = await Publication.findAll({ where: {origin: {[Op.like]: `${origin}%`}, destination: {[Op.like]: `${destination}%`},}});
+    else
+      publications = await Publication.findAll({ where: {origin: {[Op.like]: `${origin}%`}, destination: {[Op.like]: `${destination}%`}, departureDate: {[Op.between]: [startDate, finalDate]},}});
+
+    res.status(200).send(publications);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+}
 
 // GET publicación por ID
 exports.getPublicationById = async (req, res) => {

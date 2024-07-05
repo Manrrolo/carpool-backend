@@ -13,6 +13,9 @@ module.exports = function setupPublicationRoutes(app) {
   // GET todas las publicaciones
   app.get('/api/publications', [authJwt.verifyToken], controller.getAllPublications);
 
+  // GET publicaciones filtradas
+  app.get('/api/publications/filtered', controller.getFilteredPublications);
+
   // POST nueva publicacion (solo para drivers)
   app.post('/api/createPublication', [authJwt.verifyToken, authJwt.isDriver], controller.createPublication);
 
