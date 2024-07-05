@@ -238,26 +238,9 @@ exports.startTrip = async (req, res) => {
     });
 
     if (updatedTrip == 1) {
-      const publication = await Publication.findByPk(trip.publicationId);
-
-      // Obtener todos los pasajeros asociados a esta publicación excepto el conductor
-      const passengersTrips = await Trip.findAll({
-        where: {
-          publicationId: publication.publicationId,
-          userId: { [Op.ne]: publication.driverId }
-        },
-        include: [
-          {
-            model: User,
-            as: 'user',
-            attributes: ['userId']
-          }
-        ]
-      });
-      const passengerUserIds = passengersTrips.map(passengerTrip => passengerTrip.user.userId);
       await User.update(
         { inTrip: true },
-        { where: { userId: [publication.driverId, ...passengerUserIds] } }
+        { where: { userId: userId } }
       );
       res.status(200).send({ message: "Trip started successfully." });
     } else {
@@ -298,26 +281,9 @@ exports.completeTrip = async (req, res) => {
       });
 
       if (updatedTrip == 1) {
-        const publication = await Publication.findByPk(trip.publicationId);
-
-      // Obtener todos los pasajeros asociados a esta publicación excepto el conductor
-      const passengersTrips = await Trip.findAll({
-        where: {
-          publicationId: publication.publicationId,
-          userId: { [Op.ne]: publication.driverId }
-        },
-        include: [
-          {
-            model: User,
-            as: 'user',
-            attributes: ['userId']
-          }
-        ]
-      });
-      const passengerUserIds = passengersTrips.map(passengerTrip => passengerTrip.user.userId);
-      await User.update(
+        await User.update(
         { inTrip: true },
-        { where: { userId: [publication.driverId, ...passengerUserIds] } }
+        { where: { userId: userId } }
       );
         res.status(200).send({ message: "Trip was completed successfully." });
       } else {
