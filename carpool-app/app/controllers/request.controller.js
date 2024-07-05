@@ -341,3 +341,25 @@ exports.acceptRequest = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
+exports.getPendingRequestsForPublication = async (req, res) => {
+  try {
+    const publicationId = req.params.publicationId;
+
+    const requests = await Request.findAll({
+      where: {
+        publicationId,
+        status: 'pending'
+      }
+    });
+
+    const count = requests.length;
+
+    res.status(200).send({
+      requests,
+      count
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
