@@ -36,4 +36,7 @@ module.exports = function(app) {
 
   // // Actualizar una solicitud (solo para el passenger)
   // app.put("/api/requests/:requestId", [authJwt.verifyToken], requests.updateRequestByPassenger);
+
+  // Obtener todas las solicitudes pendientes para una publicación específica
+  app.get("/api/requests/publication/:publicationId/pending", [authJwt.verifyToken], requests.getPendingRequestsForPublication);
 };

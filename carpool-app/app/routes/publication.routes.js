@@ -30,4 +30,7 @@ module.exports = function setupPublicationRoutes(app) {
 
   // GET publicaciones de un usuario
   app.get('/api/users/:driverId/publications', [authJwt.verifyToken], controller.getPublicationsByUserId);
+
+  // PATCH cancelar publicación (solo para drivers)
+  app.patch('/api/cancelPublication/:id', [authJwt.verifyToken, authJwt.isDriver], controller.cancelPublication);
 };

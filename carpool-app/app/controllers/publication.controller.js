@@ -142,3 +142,29 @@ exports.deletePublication = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
+// PATCH cancelar una publicación (solo para drivers)
+exports.cancelPublication = async (req, res) => {
+  const id = req.params.id;
+  const driverId = req.userId;
+
+  try {
+    const publication = await Publication.findByPk(id);
+    if (!publication) {
+      return res.status(404).send({ message: "Publication Not found." });
+    }
+    if (publication.driverId !== driverId) {
+      return res.status(403).send({ message: "You are not authorized to cancel this publication." });
+    }
+
+    // Actualizar el estado de la publicación a false
+    await Publication.update({ status: false }, { where: { publicationId: id } });
+
+    // Actualizar todas las solicitudes relacionadas a rejected
+    await Request.update({ status: 'rejected' }, { where: { publicationId: id } });
+
+    res.status(200).send({ message: "Publication was cancelled successfully." });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
