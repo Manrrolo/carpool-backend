@@ -23,5 +23,5 @@ module.exports = function setupVehiclesRoutes(app) {
   // eliminar vehiculo (solo driver al que pertenece)
   app.delete('/api/vehicles/:vehicleId', [authJwt.verifyToken, authJwt.isDriver],controller.deleteVehicle);
 
-  app.get('/api/vehicles/:id', controller.getVehicleById);
+  app.get('/api/vehicles/:id', [authJwt.verifyToken], controller.getVehicleById);
 };

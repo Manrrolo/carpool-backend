@@ -13,6 +13,7 @@ async function seedUsers() {
       phone: '1234567890',
       // roles: 3,
       role: 'admin',
+      inTrip: false,
     });
 
     await User.create({
@@ -23,6 +24,7 @@ async function seedUsers() {
       phone: '1234567890',
       // roles: [1, 2],
       role: 'driver',
+      inTrip: false,
     });
 
     await User.create({
@@ -33,6 +35,7 @@ async function seedUsers() {
       phone: '0987654321',
       // roles: 1,
       role: 'passenger',
+      inTrip: false,
     });
 
     await User.create({
@@ -42,6 +45,7 @@ async function seedUsers() {
       email: 'alice.s@uc.cl',
       phone: '0987654321',
       role: 'driver',
+      inTrip: false,
     });
 
     await User.create({
@@ -51,6 +55,7 @@ async function seedUsers() {
       email: 'javier.h@uc.cl',
       phone: '0987654321',
       role: 'passenger',
+      inTrip: false,
     });
   } catch (error) {
     console.error('Error seeding users:', error);
