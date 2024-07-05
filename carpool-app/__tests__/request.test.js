@@ -8,7 +8,8 @@ jest.mock('../app/models', () => ({
     findByPk: jest.fn(),
     findAll: jest.fn(),
     create: jest.fn(),
-    update: jest.fn()
+    update: jest.fn(),
+    findOne: jest.fn(),
   },
   publication: {
     findAll: jest.fn(),
@@ -160,7 +161,14 @@ describe('Request Controller', () => {
         include: [
           {
             model: Request,
-            as: 'requests'
+            as: 'requests',
+            include: [
+              {
+                model: undefined,
+                as: 'passenger',
+                attributes: ['userId', 'firstName', 'lastName', 'email', 'phone'],
+              }
+            ]
           }
         ]
       });
@@ -188,7 +196,14 @@ describe('Request Controller', () => {
         include: [
           {
             model: Request,
-            as: 'requests'
+            as: 'requests',
+            include: [
+              {
+                model: undefined,
+                as: 'passenger',
+                attributes: ['userId', 'firstName', 'lastName', 'email', 'phone'],
+              }
+            ]
           }
         ]
       });
@@ -213,7 +228,14 @@ describe('Request Controller', () => {
         include: [
           {
             model: Request,
-            as: 'requests'
+            as: 'requests',
+            include: [
+              {
+                model: undefined,
+                as: 'passenger',
+                attributes: ['userId', 'firstName', 'lastName', 'email', 'phone'],
+              }
+            ]
           }
         ]
       });
@@ -272,9 +294,10 @@ describe('Request Controller', () => {
       const res = httpMocks.createResponse();
       res.send = jest.fn();
 
-      const mockPublication = { availableSeats: 3 };
+      const mockPublication = { publicationId: 1, availableSeats: 3 };
 
       Publication.findByPk.mockResolvedValue(mockPublication);
+      Request.findOne.mockResolvedValue(null);
       Request.create.mockResolvedValue({ requestId: 1 });
 
       await RequestController.createRequest(req, res);
@@ -308,6 +331,31 @@ describe('Request Controller', () => {
       expect(Publication.findByPk).toHaveBeenCalledWith(1);
       expect(res.statusCode).toBe(400);
       expect(res.send).toHaveBeenCalledWith({ message: 'No available seats.' });
+    });
+
+    it('should return 400 if passenger already requested this publication', async () => {
+      const req = httpMocks.createRequest({
+        body: {
+          publicationId: 1,
+          reservationDate: new Date(),
+        },
+        userId: 1,
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      const mockPublication = { availableSeats: 3 };
+      Publication.findByPk.mockResolvedValue(mockPublication);
+      Request.findOne.mockResolvedValue({ requestId: 1 });
+
+      await RequestController.createRequest(req, res);
+
+      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(Request.findOne).toHaveBeenCalledWith({
+        where: { publicationId: 1, passengerId: 1 }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(res.send).toHaveBeenCalledWith({ message: 'You have already requested this publication.' });
     });
 
     it('should return 500 on database error', async () => {
