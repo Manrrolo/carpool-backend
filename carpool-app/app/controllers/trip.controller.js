@@ -228,7 +228,7 @@ exports.startTrip = async (req, res) => {
       }
     })
 
-    if (tripsInProgress.length > 0){
+    if (tripsInProgress.length > 1){
       return res.status(403).send({ message: 'Cannot make two trips at the same time' });
     }
 
