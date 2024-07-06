@@ -215,9 +215,9 @@ exports.startTrip = async (req, res) => {
     }
 
     // Check userId
-    if (trip.userId !== userId) {
-      return res.status(403).send({ message: 'You are not authorized to update the status of this trip.' });
-    }
+    //if (trip.userId !== userId) {
+    //  return res.status(403).send({ message: 'You are not authorized to update the status of this trip.' });
+    //}
 
     // Not other trips in progress
     const tripsInProgress = await Trip.findAll({
