@@ -330,7 +330,7 @@ exports.acceptRequest = async (req, res) => {
           updatedPublication.status = false;
         }
 
-        await Publication.update(updatedPublication, { where: { id: request.publication.publicationId } });
+        await Publication.update(updatedPublication, { where: { publicationId: request.publication.publicationId } });
       }
 
       res.status(200).send({ message: "Request accepted successfully." });
