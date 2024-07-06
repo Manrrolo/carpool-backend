@@ -18,8 +18,8 @@ exports.getAllPublications = async (req, res) => {
   }
 };
 
-// GET publicaciones filtradas
-exports.getFilteredPublications = async (req, res) => {
+// POST publicaciones filtradas
+exports.postFilteredPublications = async (req, res) => {
   try {
     let { origin, destination, date } = req.body;
     let publications;
@@ -27,9 +27,9 @@ exports.getFilteredPublications = async (req, res) => {
     const finalDate = new Date(date).setHours(23,59,59,999);
 
     if (date == '')
-      publications = await Publication.findAll({ where: {origin: {[Op.like]: `${origin}%`}, destination: {[Op.like]: `${destination}%`},}});
+      publications = await Publication.findAll({ where: {origin: {[Op.like]: `%${origin}%`}, destination: {[Op.like]: `%${destination}%`},}});
     else
-      publications = await Publication.findAll({ where: {origin: {[Op.like]: `${origin}%`}, destination: {[Op.like]: `${destination}%`}, departureDate: {[Op.between]: [startDate, finalDate]},}});
+      publications = await Publication.findAll({ where: {origin: {[Op.like]: `%${origin}%`}, destination: {[Op.like]: `%${destination}%`}, departureDate: {[Op.between]: [startDate, finalDate]},}});
 
     res.status(200).send(publications);
   } catch (err) {
