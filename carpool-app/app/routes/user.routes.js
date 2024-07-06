@@ -27,4 +27,6 @@ module.exports = function setupUserRoutes(app) {
   // );
 
   app.get('/api/users/:userId', [authJwt.verifyToken], controller.getProfile);
+  
+  app.put('/api/users/verifyUser', [authJwt.verifyToken], controller.changeRole);
 };

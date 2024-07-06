@@ -38,3 +38,28 @@ exports.getProfile = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
+
+exports.changeRole = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({
+      where: { email: email },
+    });
+
+    // If user does not exist, return 404
+    if (!user) {
+      return res.status(404).send({ message: `User with email ${email} not found.` });
+    }
+
+    // Update the user's role to 'driver'
+    user.role = 'driver';
+    await user.save();
+
+    res.status(200).send({ message: `User role updated to driver.` });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
