@@ -31,6 +31,7 @@ module.exports = (sequelize, Sequelize) => {
     driversLicence: {
       type: Sequelize.STRING,
       defaultValue: null, // Ensure the default value is null
+
     },
   });
 

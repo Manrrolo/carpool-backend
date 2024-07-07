@@ -13,11 +13,11 @@ module.exports = function setupPublicationRoutes(app) {
   // GET todas las publicaciones
   app.get('/api/publications', [authJwt.verifyToken], controller.getAllPublications);
 
-  // GET publicaciones filtradas
-  app.get('/api/publications/filtered', controller.getFilteredPublications);
-
   // POST nueva publicacion (solo para drivers)
   app.post('/api/createPublication', [authJwt.verifyToken, authJwt.isDriver], controller.createPublication);
+
+  // POST publicaciones filtradas
+  app.post('/api/publications/filtered', [authJwt.verifyToken], controller.postFilteredPublications);
 
   // PATCH actualizar publicacion (solo para drivers)
   app.patch('/api/updatePublication/:id', [authJwt.verifyToken, authJwt.isDriver], controller.updatePublication);
@@ -30,4 +30,7 @@ module.exports = function setupPublicationRoutes(app) {
 
   // GET publicaciones de un usuario
   app.get('/api/users/:driverId/publications', [authJwt.verifyToken], controller.getPublicationsByUserId);
+
+  // PATCH cancelar publicación (solo para drivers)
+  app.patch('/api/cancelPublication/:id', [authJwt.verifyToken, authJwt.isDriver], controller.cancelPublication);
 };
