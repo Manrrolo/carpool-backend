@@ -294,19 +294,6 @@ exports.startTrip = async (req, res) => {
       return res.status(404).send({ message: `Cannot find Trip with id=${tripId}.` });
     }
 
-    // Not other trips in progress
-    const tripsInProgress = await Trip.findAll({
-      where:
-      {
-        userId: userId,
-        status: 'in progress',
-      }
-    })
-
-    if (tripsInProgress.length > 1){
-      return res.status(403).send({ message: 'Cannot make two trips at the same time' });
-    }
-
     // Update status and departureDateTime
     const updatedTrip = await Trip.update({ status: status, departureDateTime: current_date}, {
       where: { tripId: tripId },
