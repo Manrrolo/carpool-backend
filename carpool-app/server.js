@@ -52,6 +52,8 @@ require('./app/routes/publication.routes')(app);
 require('./app/routes/vehicle.routes')(app);
 require('./app/routes/request.routes')(app);
 require('./app/routes/trip.routes')(app);
+require('./app/routes/review.routes')(app);
+require('./app/routes/seed.routes')(app);
 
 // simple route
 app.get('/', (req, res) => {
