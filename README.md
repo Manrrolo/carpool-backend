@@ -40,6 +40,7 @@ POSTGRESDB_DOCKER_PORT=5432
 NODE_LOCAL_PORT=6868
 NODE_DOCKER_PORT=8080
 JWT_SECRET=carpool_db_secret
+AUTH0_JWKS_URI=https://dev-ji5myos015qpcido.us.auth0.com/.well-known/jwks.json 
 ```
 
 ### Linter

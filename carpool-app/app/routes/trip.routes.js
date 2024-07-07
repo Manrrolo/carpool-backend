@@ -40,11 +40,13 @@ module.exports = function setupTripRoutes(app) {
   // ahora trips se crean automaticamente, el de driver al crear publicacion y los de pasajeros al aceptarse su solicitud
 
   // comenzar trip (driver y passenger,no se puede tener mas de uno in progress)
-  app.put('/api/trips/start/:tripId', [authJwt.verifyToken], controller.startTrip);
+  app.put('/api/trips/start/:tripId', controller.startTrip);
 
   // terminar trip (driver y user, actualiza estado a 'completed' y actualiza arrivalDateTime)
   app.put('/api/trips/complete/:tripId', [authJwt.verifyToken], controller.completeTrip);
 
   // obtener perfil de un user por tripId y groupId
   app.get('/api/user/profile/:tripId/:groupId', [authJwt.verifyToken], controller.getUserProfileByGroupId);
+  
+  app.get('/api/trips/in-progress/:userId', [authJwt.verifyToken], controller.getInProgressTripForUser);
 };

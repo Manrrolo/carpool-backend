@@ -4,7 +4,7 @@
   "description": "Carpool Backend for JWT Authentication With PostgreSQL database",
   "main": "server.js",
   "scripts": {
-    "test": "npx jest"
+    "test": "npx jest --coverage"
   },
   "keywords": [
     "node",

@@ -327,7 +327,6 @@ exports.startTrip = async (req, res) => {
       for (const passengerTrip of passengersTrips) {
         await User.update({ inTrip: true }, { where: { userId: passengerTrip.userId } });
       }
-
       res.status(200).send({ message: "Trip started successfully." });
     } else {
       res.status(404).send({ message: `Cannot update Trip with id=${tripId}.` });
@@ -392,10 +391,14 @@ exports.completeTrip = async (req, res) => {
     }
   };
 
-
   exports.getInProgressTripForUser = async (req, res) => {
     try {
       const userId = req.userId;
+
+
+  // exports.getInProgressTripForUser = async (req, res) => {
+    // try {
+      // const userId = req.params.userId;
 
       // Buscar un viaje en progreso para el usuario dado
       const trip = await Trip.findOne({
@@ -508,6 +511,7 @@ exports.completeTrip = async (req, res) => {
 
     return allUsers[groupId].userId;
   };
+
   exports.getUserProfileByGroupId = async (req, res) => {
     try {
       const { tripId, groupId } = req.params;
@@ -549,5 +553,3 @@ exports.completeTrip = async (req, res) => {
       res.status(500).send({ message: err.message });
     }
   };
-
-  
