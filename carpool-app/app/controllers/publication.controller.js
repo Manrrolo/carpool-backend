@@ -2,6 +2,7 @@ const db = require('../models');
 const Publication = db.publication;
 const User = db.user;
 const Trip = db.trip;
+const Request = db.request;
 const Op = db.Sequelize.Op;
 
 // GET todas las publicaciones

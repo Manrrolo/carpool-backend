@@ -499,4 +499,107 @@ describe('Request Controller', () => {
       expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
     });
   });
+
+  describe('rejectRequest', () => {
+    it('should reject a request', async () => {
+      const req = httpMocks.createRequest({
+        params: {
+          requestId: 1,
+        },
+        userId: 1,
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+  
+      const mockRequest = {
+        requestId: 1,
+        publication: {
+          driverId: 1,
+        },
+      };
+  
+      Request.findByPk.mockResolvedValue(mockRequest);
+      Request.update.mockResolvedValue([1]);
+  
+      await RequestController.rejectRequest(req, res);
+  
+      expect(Request.findByPk).toHaveBeenCalledWith(1, {
+        include: [{ model: Publication, as: 'publication' }],
+      });
+      expect(Request.update).toHaveBeenCalledWith({ status: 'rejected' }, { where: { requestId: 1 } });
+      expect(res.statusCode).toBe(200);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Request rejected successfully.' });
+    });
+  
+    it('should return 404 if request is not found', async () => {
+      const req = httpMocks.createRequest({
+        params: {
+          requestId: 1,
+        },
+        userId: 1,
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+  
+      Request.findByPk.mockResolvedValue(null);
+  
+      await RequestController.rejectRequest(req, res);
+  
+      expect(Request.findByPk).toHaveBeenCalledWith(1, {
+        include: [{ model: Publication, as: 'publication' }],
+      });
+      expect(res.statusCode).toBe(404);
+      expect(res.send).toHaveBeenCalledWith({ message: `Cannot find Request with id=${1}.` });
+    });
+  
+    it('should return 403 if user is not authorized', async () => {
+      const req = httpMocks.createRequest({
+        params: {
+          requestId: 1,
+        },
+        userId: 2,
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+  
+      const mockRequest = {
+        publication: {
+          driverId: 1,
+        },
+      };
+  
+      Request.findByPk.mockResolvedValue(mockRequest);
+  
+      await RequestController.rejectRequest(req, res);
+  
+      expect(Request.findByPk).toHaveBeenCalledWith(1, {
+        include: [{ model: Publication, as: 'publication' }],
+      });
+      expect(res.statusCode).toBe(403);
+      expect(res.send).toHaveBeenCalledWith({ message: 'You are not authorized to update the status of this request.' });
+    });
+  
+    it('should return 500 on database error', async () => {
+      const req = httpMocks.createRequest({
+        params: {
+          requestId: 1,
+        },
+        userId: 1,
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+  
+      Request.findByPk.mockRejectedValue(new Error('Database error'));
+  
+      await RequestController.rejectRequest(req, res);
+  
+      expect(Request.findByPk).toHaveBeenCalledWith(1, {
+        include: [{ model: Publication, as: 'publication' }],
+      });
+      expect(res.statusCode).toBe(500);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
+    });
+  });
+  
 });
+
