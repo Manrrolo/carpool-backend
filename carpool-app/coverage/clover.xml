@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1720385579069" clover="3.2.0">
-  <project timestamp="1720385579069" name="All files">
+<coverage generated="1720385653576" clover="3.2.0">
+  <project timestamp="1720385653576" name="All files">
     <metrics statements="312" coveredstatements="262" conditionals="100" coveredconditionals="72" methods="29" coveredmethods="26" elements="441" coveredelements="360" complexity="0" loc="312" ncloc="312" packages="1" files="4" classes="4"/>
     <file name="publication.controller.js" path="/home/vcruzlabra/carpool-backend/carpool-app/app/controllers/publication.controller.js">
       <metrics statements="85" coveredstatements="71" conditionals="20" coveredconditionals="13" methods="8" coveredmethods="7"/>
