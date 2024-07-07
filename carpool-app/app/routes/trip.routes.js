@@ -33,7 +33,7 @@ module.exports = function setupTripRoutes(app) {
   app.get('/api/trips/completed', [authJwt.verifyToken], controller.getCompletedTripsForUser);
 
   // obtener trip por ID
-  app.get('/api/trips/:tripId', [authJwt.verifyToken, authJwt.isDriver], controller.getTripById);
+  app.get('/api/trips/:tripId', [authJwt.verifyToken], controller.getTripById);
 
   // crear trip (passengers y driver)
   //app.post('/api/trips', [authJwt.verifyToken], controller.createTrip);
