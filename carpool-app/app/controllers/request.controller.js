@@ -326,9 +326,9 @@ exports.acceptRequest = async (req, res) => {
         const newAvailableSeats = request.publication.availableSeats - 1;
         const updatedPublication = { availableSeats: newAvailableSeats };
         
-        if (newAvailableSeats === 0) {
-          updatedPublication.status = false;
-        }
+        //if (newAvailableSeats === 0) {
+        //  updatedPublication.status = false;
+        //}
 
         await Publication.update(updatedPublication, { where: { publicationId: request.publication.publicationId } });
       }

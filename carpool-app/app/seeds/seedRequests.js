@@ -19,8 +19,8 @@ async function seedRequests() {
     });
 
     await Request.create({
-      publicationId: 3,
-      passengerId: 'auth0|667209355ff76c5f6ecc52c0',
+      publicationId: 2,
+      passengerId: 'auth0|6675237b5aef436d40985d18',
       reservationDate: new Date(),
       status: 'rejected',
     });

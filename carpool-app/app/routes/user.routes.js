@@ -1,5 +1,8 @@
 const { authJwt } = require('../middleware');
 const controller = require('../controllers/user.controller');
+const multer = require('multer');
+const upload = multer();
+
 
 module.exports = function setupUserRoutes(app) {
   app.use((req, res, next) => {
@@ -27,4 +30,12 @@ module.exports = function setupUserRoutes(app) {
   // );
 
   app.get('/api/users/:userId', [authJwt.verifyToken], controller.getProfile);
+
+  app.put('/api/users/verifyUser', [authJwt.verifyToken], controller.changeRole);
+
+  app.post('/api/users/:userId/uploadDriversLicence', [authJwt.verifyToken, upload.single('driversLicence')], controller.uploadDriversLicence);
+
+  app.get('/api/users/getDriversLicenceRequests', [authJwt.verifyToken], controller.getDriversLicenceRequests);
+
+  app.get('/api/users/:userId/getDriversLicence', [authJwt.verifyToken], controller.getDriversLicence);
 };
