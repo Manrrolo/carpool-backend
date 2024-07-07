@@ -26,6 +26,12 @@ module.exports = function setupTripRoutes(app) {
   // obtener todos los trips de un passenger, drivers no veran trips de sus propios viajes
   app.get('/api/trips/passenger', [authJwt.verifyToken], controller.getAllTripsForPassenger);
 
+  // obtener trip in progress de un user
+  app.get('/api/trips/in-progress', [authJwt.verifyToken], controller.getInProgressTripForUser);
+
+  // obtener trips completed de un user
+  app.get('/api/trips/completed', [authJwt.verifyToken], controller.getCompletedTripsForUser);
+
   // obtener trip por ID
   app.get('/api/trips/:tripId', [authJwt.verifyToken, authJwt.isDriver], controller.getTripById);
 
@@ -38,4 +44,7 @@ module.exports = function setupTripRoutes(app) {
 
   // terminar trip (driver y user, actualiza estado a 'completed' y actualiza arrivalDateTime)
   app.put('/api/trips/complete/:tripId', [authJwt.verifyToken], controller.completeTrip);
+
+  // obtener perfil de un user por tripId y groupId
+  app.get('/api/user/profile/:tripId/:groupId', [authJwt.verifyToken], controller.getUserProfileByGroupId);
 };

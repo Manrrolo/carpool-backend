@@ -2,6 +2,7 @@ const db = require('../models');
 const Trip = db.trip;
 const Publication = db.publication;
 const Request = db.request;
+const Review = db.review;
 const { DataTypes, Op, where } = require('sequelize');
 const User = db.user;
 
@@ -281,6 +282,163 @@ exports.completeTrip = async (req, res) => {
       } else {
         res.status(404).send({ message: `Cannot update Trip with id=${tripId}.` });
       }
+    } catch (err) {
+      res.status(500).send({ message: err.message });
+    }
+  };
+
+  exports.getInProgressTripForUser = async (req, res) => {
+    try {
+      const userId = req.userId;
+
+      // Buscar un viaje en progreso para el usuario dado
+      const trip = await Trip.findOne({
+        where: {
+          userId: userId,
+          status: 'in progress',
+        },
+      });
+
+      if (trip) {
+        res.status(200).send({ tripId: trip.tripId });
+      } else {
+        res.status(200).send([]);
+      }
+    } catch (err) {
+      res.status(500).send({ message: err.message });
+    }
+  };
+
+
+  exports.getCompletedTripsForUser = async (req, res) => {
+    try {
+      const userId = req.userId;
+
+      // Buscar viajes completados para el usuario dado
+      const completedTrips = await Trip.findAll({
+        where: {
+          userId: userId,
+          status: 'completed',
+        },
+        include: [
+          {
+            model: Publication,
+            as: 'publication',
+            attributes: ['origin', 'destination', 'departureDate'],
+          },
+          {
+            model: User,
+            as: 'user',
+            attributes: ['firstName', 'lastName'],
+          },
+        ],
+      });
+
+      if (completedTrips.length > 0) {
+        const tripsInfo = completedTrips.map((trip) => ({
+          tripId: trip.tripId,
+          origin: trip.publication.origin,
+          destination: trip.publication.destination,
+          departureDateTime: trip.publication.departureDate,
+          statusTrip: trip.status,
+          user: {
+            firstName: trip.user.firstName,
+            lastName: trip.user.lastName,
+          },
+        }));
+        res.status(200).send(tripsInfo);
+      } else {
+        res.status(200).send([]);
+      }
+    } catch (err) {
+      res.status(500).send({ message: err.message });
+    }
+  };
+
+  const getUserIdFromGroupId = async (tripId, groupId) => {
+    const trip = await Trip.findByPk(tripId, {
+      include: [
+        {
+          model: Publication,
+          as: 'publication',
+          include: [
+            {
+              model: User,
+              as: 'driver',
+              attributes: ['userId', 'firstName', 'lastName'],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!trip) {
+      throw new Error('Trip not found');
+    }
+
+    const passengers = await Trip.findAll({
+      where: {
+        publicationId: trip.publicationId,
+        userId: { [Op.ne]: trip.publication.driver.userId },
+        [Op.or]: [{ status: 'in progress' }, { status: 'completed' }],
+      },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['userId', 'firstName', 'lastName'],
+        },
+      ],
+    });
+
+    const allUsers = [
+      trip.publication.driver,
+      ...passengers.map((pt) => pt.user),
+    ];
+
+    if (groupId < 0 || groupId >= allUsers.length) {
+      throw new Error('Invalid groupId');
+    }
+
+    return allUsers[groupId].userId;
+  };
+  exports.getUserProfileByGroupId = async (req, res) => {
+    try {
+      const { tripId, groupId } = req.params;
+      const userId = await getUserIdFromGroupId(tripId, parseInt(groupId, 10));
+
+      // Buscar el usuario por userId
+      const user = await User.findOne({
+        where: { userId: userId },
+      });
+
+      // Si el usuario no existe, devolver error 404
+      if (!user) {
+        return res
+          .status(404)
+          .send({ message: `User with userId ${userId} not found.` });
+      }
+
+      // Buscar los reviews del usuario
+      const reviews = await Review.findAll({
+        where: { userId: userId },
+      });
+
+      let averageRating = null;
+      // Calcular el rating promedio si el usuario tiene reviews
+      if (reviews.length > 0) {
+        const totalRating = reviews.reduce(
+          (acc, review) => acc + review.rating,
+          0,
+        );
+        averageRating = totalRating / reviews.length;
+      }
+
+      res.status(200).send({
+        user,
+        reviews,
+        averageRating,
+      });
     } catch (err) {
       res.status(500).send({ message: err.message });
     }
