@@ -327,6 +327,7 @@ exports.startTrip = async (req, res) => {
       for (const passengerTrip of passengersTrips) {
         await User.update({ inTrip: true }, { where: { userId: passengerTrip.userId } });
       }
+
       res.status(200).send({ message: "Trip started successfully." });
     } else {
       res.status(404).send({ message: `Cannot update Trip with id=${tripId}.` });
@@ -339,66 +340,114 @@ exports.startTrip = async (req, res) => {
 
 /// PUT update the status of a trip to 'complete', and update arrivalDateTime
 exports.completeTrip = async (req, res) => {
-    try {
-      const tripId = req.params.tripId;
-      const status = 'completed';
-      const userId = req.userId;
-      const current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  try {
+    const tripId = req.params.tripId;
+    const status = 'completed';
+    const userId = req.userId;
+    const current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-      const trip = await Trip.findByPk(tripId);
+    // Buscar el viaje por ID
+    const trip = await Trip.findByPk(tripId);
 
-      if (!trip) {
-        return res.status(404).send({ message: `Cannot find Trip with id=${tripId}.` });
-      }
+    if (!trip) {
+      return res.status(404).send({ message: `Cannot find Trip with id=${tripId}.` });
+    }
 
-      // Check userId
-      if (trip.userId !== userId) {
-        return res.status(403).send({ message: 'You are not authorized to update the status of this trip.' });
-      }
+    // Buscar la publicación relacionada con el viaje
+    const publication = await Publication.findByPk(trip.publicationId);
+    if (!publication) {
+      return res.status(404).send({ message: "Publication not found" });
+    }
 
-      // Check trip was started
-      if (trip.status !== 'in progress'){
-        return res.status(403).send({ message: 'You cannot complete a trip that has not been started.' })
-      }
+    // Verificar que el usuario que intenta completar el viaje es el conductor
+    if (publication.driverId !== userId) {
+      return res.status(403).send({ message: 'You are not authorized to update the status of this trip.' });
+    }
 
-      // Update status and arrivalTime
-      const updatedTrip = await Trip.update({ status: status, arrivalDateTime: current_date}, {
-        where: { tripId: tripId },
+    // Verificar que el viaje ha sido iniciado
+    if (trip.status !== 'in progress') {
+      return res.status(403).send({ message: 'You cannot complete a trip that has not been started.' });
+    }
+
+    // Encontrar todos los viajes asociados con la publicación y actualizar su estado a 'completed'
+    const [updated] = await Trip.update(
+      { status: status, arrivalDateTime: current_date },
+      { where: { publicationId: trip.publicationId } }
+    );
+
+    if (updated > 0) {
+      // Actualizar el estado del conductor
+      await User.update({ inTrip: false }, { where: { userId: publication.driverId } });
+
+      // Actualizar el estado de todos los pasajeros
+      const passengersTrips = await Trip.findAll({
+        where: {
+          publicationId: trip.publicationId,
+        }
       });
 
-      if (updatedTrip == 1) {
-        // Update the driver's status
-         await User.update({ inTrip: false }, { where: { userId: userId } });
-
-        // Find all passengers of the trip and update their status
-        const passengersTrips = await Trip.findAll({
-          where: {
-            publicationId: trip.publicationId,
-            userId: { [Op.ne]: userId }
-          }
-        });
-
-        for (const passengerTrip of passengersTrips) {
-          await User.update({ inTrip: false }, { where: { userId: passengerTrip.userId } });
-        }
-
-        res.status(200).send({ message: "Trip completed successfully." });
-      } else {
-        res.status(404).send({ message: `Cannot update Trip with id=${tripId}.` });
+      for (const passengerTrip of passengersTrips) {
+        await User.update({ inTrip: false }, { where: { userId: passengerTrip.userId } });
       }
-    } catch (err) {
-      res.status(500).send({ message: err.message });
+
+      res.status(200).send({ message: "Trip completed successfully for all related trips." });
+    } else {
+      res.status(404).send({ message: `Cannot update Trips with publicationId=${trip.publicationId}.` });
     }
-  };
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+
+
+/// PUT update the status of a passenger's trip to 'complete', and update arrivalDateTime
+exports.completePassengerTrip = async (req, res) => {
+  try {
+    const tripId = req.params.tripId;
+    const status = 'completed';
+    const userId = req.userId;
+    const current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    const trip = await Trip.findByPk(tripId);
+
+    if (!trip) {
+      return res.status(404).send({ message: `Cannot find Trip with id=${tripId}.` });
+    }
+
+    // Check userId
+    if (trip.userId !== userId) {
+      return res.status(403).send({ message: 'You are not authorized to update the status of this trip.' });
+    }
+
+    // Check trip was started
+    if (trip.status !== 'in progress'){
+      return res.status(403).send({ message: 'You cannot complete a trip that has not been started.' });
+    }
+
+    // Update status and arrivalTime
+    const [updated] = await Trip.update({ status: status, arrivalDateTime: current_date }, {
+      where: { tripId: tripId, userId: userId },
+    });
+
+    if (updated === 1) {
+      await User.update({ inTrip: false }, { where: { userId: userId } });
+
+      res.status(200).send({ message: "Passenger trip completed successfully." });
+    } else {
+      res.status(404).send({ message: `Cannot update Trip with id=${tripId}.` });
+    }
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+
+
 
   exports.getInProgressTripForUser = async (req, res) => {
     try {
       const userId = req.userId;
-
-
-  // exports.getInProgressTripForUser = async (req, res) => {
-    // try {
-      // const userId = req.params.userId;
 
       // Buscar un viaje en progreso para el usuario dado
       const trip = await Trip.findOne({
@@ -511,7 +560,6 @@ exports.completeTrip = async (req, res) => {
 
     return allUsers[groupId].userId;
   };
-
   exports.getUserProfileByGroupId = async (req, res) => {
     try {
       const { tripId, groupId } = req.params;
@@ -553,3 +601,5 @@ exports.completeTrip = async (req, res) => {
       res.status(500).send({ message: err.message });
     }
   };
+
+  
