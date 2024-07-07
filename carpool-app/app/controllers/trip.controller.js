@@ -80,7 +80,7 @@ exports.getInfoOfTrip = async (req, res) => {
     res.status(200).send( {
       origin: publication.origin,
       destination: publication.destination,
-      departureDateTime: trip.departureDateTime,
+      departureDateTime: publication.departureDate,
       statusTrip: status,
       driver: {firstName: driver.firstName, lastName: driver.lastName},
       passengers: passengersTrips });
