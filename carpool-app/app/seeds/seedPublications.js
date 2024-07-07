@@ -25,6 +25,16 @@ async function seedPublications() {
       status: false,
       departureDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
     });
+     await Publication.create({
+       driverId: 'auth0|6675248501de4d750dcfa352',
+       // driverName: 'Alice Smith',
+       origin: 'Las Condes',
+       destination: 'Campus San Joaquín',
+       availableSeats: 4,
+       cost: 15,
+       status: true,
+       departureDate: new Date(Date.now() + 7 * 60 * 60 * 1000),
+     });
   } catch (error) {
     console.error('Error seeding publications:', error);
   }

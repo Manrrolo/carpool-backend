@@ -16,7 +16,7 @@ exports.signup = (req, res) => {
     email: req.body.email,
     phone: req.body.phone,
     role: 'passenger',
-    inTrip: false,
+    inTrip : false,
   })
     .then((user) => {
       if (req.body.roles) {

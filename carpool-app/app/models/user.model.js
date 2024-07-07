@@ -25,8 +25,8 @@ module.exports = (sequelize, Sequelize) => {
     },
     inTrip: {
       type: Sequelize.BOOLEAN,
-      defaultValue: false,
-    }
+      // defaultValue: false,
+    },
   });
 
   return User;

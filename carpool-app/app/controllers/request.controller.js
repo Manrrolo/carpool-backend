@@ -136,6 +136,17 @@ exports.createRequest = async (req, res) => {
       return res.status(400).send({ message: "No available seats." });
     }
 
+    const existingRequest = await Request.findOne({
+      where: {
+        publicationId,
+        passengerId
+      }
+    });
+
+    if (existingRequest) {
+      return res.status(400).send({ message: "You have already requested this publication." });
+    }
+
     const request = await Request.create({ publicationId, passengerId, reservationDate, status: 'pending' });
 
     res.status(201).send(request);
@@ -310,13 +321,44 @@ exports.acceptRequest = async (req, res) => {
       // Crea un nuevo viaje y disminuye los asientos disponibles si hay al menos un asiento
       if (request.publication.availableSeats > 0) {
         await Trip.create({ publicationId: request.publication.publicationId, userId: request.passengerId, status: 'pending' });
-        await Publication.update({ availableSeats: request.publication.availableSeats - 1 }, { where: { publicationId: request.publication.publicationId } });
+        // await Publication.update({ availableSeats: request.publication.availableSeats - 1 }, { where: { publicationId: request.publication.publicationId } });
+
+        const newAvailableSeats = request.publication.availableSeats - 1;
+        const updatedPublication = { availableSeats: newAvailableSeats };
+        
+        if (newAvailableSeats === 0) {
+          updatedPublication.status = false;
+        }
+
+        await Publication.update(updatedPublication, { where: { publicationId: request.publication.publicationId } });
       }
 
       res.status(200).send({ message: "Request accepted successfully." });
     } else {
       res.status(404).send({ message: `Cannot update Request with id=${requestId}.` });
     }
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+exports.getPendingRequestsForPublication = async (req, res) => {
+  try {
+    const publicationId = req.params.publicationId;
+
+    const requests = await Request.findAll({
+      where: {
+        publicationId,
+        status: 'pending'
+      }
+    });
+
+    const count = requests.length;
+
+    res.status(200).send({
+      requests,
+      count
+    });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
