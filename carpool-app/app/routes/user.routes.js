@@ -33,9 +33,13 @@ module.exports = function setupUserRoutes(app) {
 
   app.put('/api/users/verifyUser', [authJwt.verifyToken], controller.changeRole);
 
-  app.post('/api/users/:userId/uploadDriversLicence', [authJwt.verifyToken, upload.single('driversLicence')], controller.uploadDriversLicence);
+  app.post('/api/users/:userId/uploadDriversLicence', [upload.single('driversLicence')], controller.uploadDriversLicence);
 
   app.get('/api/users/getDriversLicenceRequests', [authJwt.verifyToken], controller.getDriversLicenceRequests);
 
   app.get('/api/users/:userId/getDriversLicence', [authJwt.verifyToken], controller.getDriversLicence);
+
+  app.del('/api/users/:userId/rejectLicence', [authJwt.verifyToken], controller.rejectDriversLicence);
+
+  app.post('/api/users/:userId/acceptLicence', [authJwt.verifyToken], controller.acceptDriversLicence);
 };
