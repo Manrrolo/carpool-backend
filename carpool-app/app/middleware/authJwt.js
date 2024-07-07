@@ -38,7 +38,6 @@ const verifyToken = (req, res, next) => {
     }
     req.userId = decoded.sub;
     req.decoded = decoded;
-    console.log('Decoded JWT:', decoded);
     next();
   });
 };

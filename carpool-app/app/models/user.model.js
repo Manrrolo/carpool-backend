@@ -22,7 +22,10 @@ module.exports = (sequelize, Sequelize) => {
         model: 'roles',
         key: 'name',
       },
-    }
+    },
+    inTrip: {
+      type: Sequelize.BOOLEAN,
+    },
   });
 
   return User;
