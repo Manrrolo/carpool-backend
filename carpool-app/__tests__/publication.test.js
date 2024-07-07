@@ -1,25 +1,56 @@
-
+const Sequelize = require('sequelize');
 const PublicationController = require('../app/controllers/publication.controller');
 const httpMocks = require('node-mocks-http');
 
-// Mock the database models
-jest.mock('../app/models', () => ({
-  publication: {
-    findByPk: jest.fn(),
-    findAll: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    destroy: jest.fn(),
-  },
-  user: {
-    findByPk: jest.fn(),
-  },
-  trip: {
-    create: jest.fn(),
-  }
-}));
+// // Mock the database models
+// jest.mock('../app/models', () => ({
+//   Sequelize: {
+//     Op: Sequelize.Op
+//   },
+//   publication: {
+//     findByPk: jest.fn(),
+//     findAll: jest.fn(),
+//     create: jest.fn(),
+//     update: jest.fn(),
+//     destroy: jest.fn(),
+//   },
+//   user: {
+//     findByPk: jest.fn(),
+//   },
+//   trip: {
+//     create: jest.fn(),
+//   }
+// }));
 
-const { publication: Publication, trip: Trip } = require('../app/models');
+jest.mock('../app/models', () => {
+  const Sequelize = require('sequelize');
+  const Op = Sequelize.Op;
+
+  return {
+    Sequelize: {
+      Op: Op
+    },
+    publication: {
+      findByPk: jest.fn(),
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      destroy: jest.fn(),
+    },
+    user: {
+      findByPk: jest.fn(),
+    },
+    trip: {
+      create: jest.fn(),
+    },
+    request: {
+      update: jest.fn(),
+    }
+  };
+});
+
+// const { publication: Publication, trip: Trip } = require('../app/models');
+const { publication: Publication, trip: Trip, request: Request } = require('../app/models');
 
 describe('Publication Controller', () => {
   afterEach(() => {
@@ -337,4 +368,158 @@ describe('Publication Controller', () => {
     });
   });
 
+  describe('postFilteredPublications', () => {
+    it('should get filtered publications without date', async () => {
+      const req = httpMocks.createRequest({
+        body: {
+          origin: 'Origin',
+          destination: 'Destination',
+          date: ''
+        }
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      const publications = [{ publicationId: 1 }, { publicationId: 2 }];
+      Publication.findAll.mockResolvedValue(publications);
+
+      await PublicationController.postFilteredPublications(req, res);
+
+      // expect(Publication.findAll).toHaveBeenCalledWith({
+      //   where: {
+      //     origin: { [Op.iLike]: '%Origin%' },
+      //     destination: { [Op.iLike]: '%Destination%' }
+      //   }
+      // });
+      expect(Publication.findAll).toHaveBeenCalled()
+      expect(res.statusCode).toBe(200);
+      expect(res.send).toHaveBeenCalledWith(publications);
+    });
+
+    it('should get filtered publications with date', async () => {
+      const req = httpMocks.createRequest({
+        body: {
+          origin: 'Origin',
+          destination: 'Destination',
+          date: '2023-01-01'
+        }
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      const publications = [{ publicationId: 1 }, { publicationId: 2 }];
+      Publication.findAll.mockResolvedValue(publications);
+
+      await PublicationController.postFilteredPublications(req, res);
+
+      // expect(Publication.findAll).toHaveBeenCalledWith({
+      //   where: {
+      //     origin: { [Op.iLike]: '%Origin%' },
+      //     destination: { [Op.iLike]: '%Destination%' },
+      //     departureDate: { [Op.between]: [expect.any(Date), expect.any(Date)] }
+      //   }
+      // });
+      expect(Publication.findAll).toHaveBeenCalled()
+      expect(res.statusCode).toBe(200);
+      expect(res.send).toHaveBeenCalledWith(publications);
+    });
+
+    it('should handle errors', async () => {
+      const req = httpMocks.createRequest({
+        body: {
+          origin: 'Origin',
+          destination: 'Destination',
+          date: '2023-01-01'
+        }
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      Publication.findAll.mockRejectedValue(new Error('Database error'));
+
+      await PublicationController.postFilteredPublications(req, res);
+
+      expect(Publication.findAll).toHaveBeenCalled();
+      expect(res.statusCode).toBe(500);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
+    });
+  });
+
+  describe('cancelPublication', () => {
+    it('should cancel a publication and update requests', async () => {
+      const req = httpMocks.createRequest({
+        params: { id: 1 },
+        userId: 1
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      const mockPublication = { driverId: 1, publicationId: 1 };
+
+      Publication.findByPk.mockResolvedValue(mockPublication);
+      Publication.update.mockResolvedValue([1]);
+      Request.update.mockResolvedValue([1]);
+
+      await PublicationController.cancelPublication(req, res);
+
+      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(Publication.update).toHaveBeenCalledWith({ status: false }, { where: { publicationId: 1 } });
+      expect(Request.update).toHaveBeenCalledWith({ status: 'rejected' }, { where: { publicationId: 1 } });
+      expect(res.statusCode).toBe(200);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Publication was cancelled successfully.' });
+    });
+
+    it('should return 404 if publication is not found', async () => {
+      const req = httpMocks.createRequest({
+        params: { id: 1 },
+        userId: 1
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      Publication.findByPk.mockResolvedValue(null);
+
+      await PublicationController.cancelPublication(req, res);
+
+      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(res.statusCode).toBe(404);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Publication Not found.' });
+    });
+
+    it('should return 403 if user is not authorized', async () => {
+      const req = httpMocks.createRequest({
+        params: { id: 1 },
+        userId: 2
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      const mockPublication = { driverId: 1 };
+
+      Publication.findByPk.mockResolvedValue(mockPublication);
+
+      await PublicationController.cancelPublication(req, res);
+
+      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(res.statusCode).toBe(403);
+      expect(res.send).toHaveBeenCalledWith({ message: 'You are not authorized to cancel this publication.' });
+    });
+
+    it('should handle errors', async () => {
+      const req = httpMocks.createRequest({
+        params: { id: 1 },
+        userId: 1
+      });
+      const res = httpMocks.createResponse();
+      res.send = jest.fn();
+
+      Publication.findByPk.mockRejectedValue(new Error('Database error'));
+
+      await PublicationController.cancelPublication(req, res);
+
+      expect(Publication.findByPk).toHaveBeenCalledWith(1);
+      expect(res.statusCode).toBe(500);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Database error' });
+    });
+  });
 });
