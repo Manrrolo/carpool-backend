@@ -27,9 +27,9 @@ exports.postFilteredPublications = async (req, res) => {
     const finalDate = new Date(date).setHours(23,59,59,999);
 
     if (date == '')
-      publications = await Publication.findAll({ where: {origin: {[Op.like]: `%${origin}%`}, destination: {[Op.like]: `%${destination}%`},}});
+      publications = await Publication.findAll({ where: {origin: {[Op.iLike]: `%${origin}%`}, destination: {[Op.iLike]: `%${destination}%`},}});
     else
-      publications = await Publication.findAll({ where: {origin: {[Op.like]: `%${origin}%`}, destination: {[Op.like]: `%${destination}%`}, departureDate: {[Op.between]: [startDate, finalDate]},}});
+      publications = await Publication.findAll({ where: {origin: {[Op.iLike]: `%${origin}%`}, destination: {[Op.iLike]: `%${destination}%`}, departureDate: {[Op.between]: [startDate, finalDate]},}});
 
     res.status(200).send(publications);
   } catch (err) {
