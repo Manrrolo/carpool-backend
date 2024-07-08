@@ -1,6 +1,7 @@
 const db = require('../models');
 const Publication = db.publication;
 const User = db.user;
+const Request = db.request;
 const Trip = db.trip;
 const Request = db.request;
 const Op = db.Sequelize.Op;
