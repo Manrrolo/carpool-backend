@@ -130,7 +130,7 @@ exports.getDriversLicenceRequests = async (req, res) => {
     const users = await User.findAll({
       where: {
         driversLicence: {
-          [Sequelize.Op.not]: null // driversLicence no es nulo
+          [Op.not]: null // driversLicence no es nulo
         },
         role: 'passenger' // Rol es 'passenger'
       },
