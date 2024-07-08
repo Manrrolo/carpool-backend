@@ -34,7 +34,7 @@ exports.createReview = async (req, res) => {
         const { tripId, rating, comment } = req.body;
 
         if (!userId || !tripId || !rating || !comment) {
-            return res.status(400).send({ message: "Missing data to create review.zzz" });
+            return res.status(400).send({ message: "Missing data to create review." });
         }
 
         const review = await Review.create({ userId, tripId, rating, comment });
