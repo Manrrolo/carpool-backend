@@ -18,7 +18,7 @@ async function seedTrips() {
     });
 
     await Trip.create({
-      publicationId: 3,
+      publicationId: 1,
       userId: 'auth0|6672097fdff67714af259298',
       status: 'pending',
     });

@@ -25,7 +25,12 @@ module.exports = (sequelize, Sequelize) => {
     },
     inTrip: {
       type: Sequelize.BOOLEAN,
-      // defaultValue: false,
+      defaultValue: false,
+    },
+
+    driversLicence: {
+      type: Sequelize.STRING,
+      defaultValue: null, // Ensure the default value is null
     },
   });
 

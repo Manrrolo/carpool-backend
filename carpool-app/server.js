@@ -2,7 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const process = require('process');
 require('dotenv').config();
-
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const app = express();
 
 // const corsOptions = {
@@ -53,6 +55,7 @@ require('./app/routes/vehicle.routes')(app);
 require('./app/routes/request.routes')(app);
 require('./app/routes/trip.routes')(app);
 require('./app/routes/review.routes')(app);
+require('./app/routes/seed.routes')(app);
 
 // simple route
 app.get('/', (req, res) => {
