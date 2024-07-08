@@ -5,7 +5,7 @@ const { Op } = require('sequelize');
 const { Readable } = require('stream');
 const fs = require('fs');
 const path = require('path');
-const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const crypto = require('crypto');
 require('dotenv').config();
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
@@ -130,7 +130,7 @@ exports.getDriversLicenceRequests = async (req, res) => {
     const users = await User.findAll({
       where: {
         driversLicence: {
-          [Sequelize.Op.not]: null // driversLicence no es nulo
+          [Op.not]: null // driversLicence no es nulo
         },
         role: 'passenger' // Rol es 'passenger'
       },
@@ -177,3 +177,90 @@ exports.getDriversLicence = async (req, res) => {
     res.status(500).send({ message: 'Error fetching profile picture.' });
   }
 };
+
+
+exports.acceptDriversLicence = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findOne({
+      where: { userId: userId },
+    });
+
+    if (!user || !user.driversLicence) {
+      return res.status(404).send({ message: `User with userId ${userId} or driver's licence not found.` });
+    }
+
+    // Update the user's role to 'driver'
+    user.role = 'driver';
+    await user.save();
+
+    res.status(200).send({ message: `User role updated to driver.` });
+  } catch (err) {
+    console.error("Error accepting driver's licence: ", err);
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// Endpoint to reject the driver's licence validation
+exports.rejectDriversLicence = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findOne({
+      where: { userId: userId },
+    });
+
+    if (!user || !user.driversLicence) {
+      return res.status(404).send({ message: `User with userId ${userId} or driver's licence not found.` });
+    }
+
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: path.basename(user.driversLicence), // Nombre de archivo en S3
+    };
+
+    const command = new DeleteObjectCommand(params);
+    await s3.send(command);
+
+    user.driversLicence = null;
+    await user.save();
+
+    res.status(200).send({ message: `Driver's licence rejected and removed.` });
+  } catch (err) {
+    console.error("Error rejecting driver's licence: ", err);
+    res.status(500).send({ message: err.message });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { firstName, lastName, phone } = req.body;
+
+    // Buscar el usuario por userId
+    const user = await User.findOne({
+      where: { userId: userId },
+    });
+
+    // Si el usuario no existe, devolver error 404
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: `User with userId ${userId} not found.` });
+    }
+
+    // Actualizar los campos permitidos
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.phone = phone || user.phone;
+
+    // Guardar los cambios
+    await user.save();
+
+    res.status(200).send({ message: 'Profile updated successfully.', user });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+

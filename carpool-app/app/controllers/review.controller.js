@@ -1,5 +1,9 @@
 const db = require('../models');
 const Review = db.review;
+const User = db.user;
+const Trip = db.trip;
+const Publication = db.publication;
+const { DataTypes, Op, where } = require('sequelize');
 
 // GET ALL reviews of a user
 exports.getAllReviewsByUser = async (req, res) => {
@@ -30,7 +34,7 @@ exports.createReview = async (req, res) => {
         const { tripId, rating, comment } = req.body;
 
         if (!userId || !tripId || !rating || !comment) {
-            return res.status(400).send({ message: "Missing data to create review." });
+            return res.status(400).send({ message: "Missing data to create review.zzz" });
         }
 
         const review = await Review.create({ userId, tripId, rating, comment });
@@ -114,4 +118,78 @@ exports.getReviewById = async (req, res) => {
     } catch (err) {
         res.status(500).send({ message: err.message });
     }
+};
+
+const getUserIdFromGroupId = async (tripId, groupId) => {
+  const trip = await Trip.findByPk(tripId, {
+    include: [
+      {
+        model: Publication,
+        as: 'publication',
+        include: [
+          {
+            model: User,
+            as: 'driver',
+            attributes: ['userId', 'firstName', 'lastName'],
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!trip) {
+    throw new Error('Trip not found');
+  }
+
+  const passengers = await Trip.findAll({
+    where: {
+      publicationId: trip.publicationId,
+      userId: { [Op.ne]: trip.publication.driver.userId },
+      [Op.or]: [{ status: 'in progress' }, { status: 'completed' }],
+    },
+    include: [
+      {
+        model: User,
+        as: 'user',
+        attributes: ['userId', 'firstName', 'lastName'],
+      },
+    ],
+  });
+
+  const allUsers = [
+    trip.publication.driver,
+    ...passengers.map((pt) => pt.user),
+  ];
+
+  if (groupId < 0 || groupId >= allUsers.length) {
+    throw new Error('Invalid groupId');
+  }
+
+  return allUsers[groupId].userId;
+};
+
+// Create New Review
+exports.createReviewer = async (req, res) => {
+  try {
+    const { tripId, groupId, rating, comment } = req.body;
+    if (
+      tripId === undefined ||
+      groupId === undefined ||
+      rating === undefined ||
+      comment === undefined ||
+      comment === ''
+    ) {
+      console.log('Missing data detected');
+      return res
+        .status(400)
+        .send({ message: 'Missing data to create review.' });
+    }
+
+    const userId = await getUserIdFromGroupId(tripId, parseInt(groupId, 10));
+
+    const review = await Review.create({ userId, tripId, rating, comment });
+    res.status(201).send(review);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
