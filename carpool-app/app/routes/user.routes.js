@@ -35,7 +35,7 @@ module.exports = function setupUserRoutes(app) {
 
   app.post('/api/users/:userId/uploadDriversLicence', [upload.single('driversLicence')], controller.uploadDriversLicence);
 
-  app.get('/api/users/getDriversLicenceRequests', [authJwt.verifyToken], controller.getDriversLicenceRequests);
+  app.get('/api/users/:userId/getDriversLicenceRequests', [authJwt.verifyToken], controller.getDriversLicenceRequests);
 
   app.get('/api/users/:userId/getDriversLicence', [authJwt.verifyToken], controller.getDriversLicence);
 
