@@ -7,7 +7,7 @@ async function seedTrips() {
     await Trip.create({
       publicationId: 1,
       userId: 'auth0|667209355ff76c5f6ecc52c0',
-      status: 'in progress',
+      status: 'pending',
       departureDateTime: new Date(Date.now() + 6 * 60 * 60 * 1000)
     });
 
@@ -40,7 +40,7 @@ async function seedTrips() {
     await Trip.create({
       publicationId: 1,
       userId: 'auth0|6672097fdff67714af259298',
-      status: 'in progress',
+      status: 'pending',
       departureDateTime: new Date(Date.now() + 8 * 60 * 60 * 1000),
     })
   } catch (error) {

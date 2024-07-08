@@ -20,6 +20,11 @@ exports.getProfile = async (req, res) => {
     // Buscar los reviews del usuario
     const reviews = await Review.findAll({
       where: { userId: userId },
+      include: {
+        model: User,
+        as: 'user',
+        attributes: ['firstName', 'lastName'],
+      },
     });
 
     let averageRating = null;
@@ -34,6 +39,37 @@ exports.getProfile = async (req, res) => {
       averageRating,
       user
     });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { firstName, lastName, phone } = req.body;
+
+    // Buscar el usuario por userId
+    const user = await User.findOne({
+      where: { userId: userId },
+    });
+
+    // Si el usuario no existe, devolver error 404
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: `User with userId ${userId} not found.` });
+    }
+
+    // Actualizar los campos permitidos
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.phone = phone || user.phone;
+
+    // Guardar los cambios
+    await user.save();
+
+    res.status(200).send({ message: 'Profile updated successfully.', user });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }

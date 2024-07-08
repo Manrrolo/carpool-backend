@@ -27,4 +27,7 @@ module.exports = function setupUserRoutes(app) {
   // );
 
   app.get('/api/users/:userId', [authJwt.verifyToken], controller.getProfile);
+
+  // Ruta para actualizar el perfil del usuario
+  app.put('/profile/:userId', [authJwt.verifyToken], controller.updateProfile);
 };

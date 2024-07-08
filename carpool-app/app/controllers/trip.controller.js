@@ -363,10 +363,19 @@ exports.completeTrip = async (req, res) => {
     );
 
     if (updated > 0) {
-      // Actualizar el estado del conductor
-      await User.update({ inTrip: false }, { where: { userId: publication.driverId } });
+      // Actualizar el estado del conductor solo si no tiene otros viajes en progreso
+      const driverTripsInProgress = await Trip.count({
+        where: {
+          userId: publication.driverId,
+          status: 'in progress',
+        }
+      });
 
-      // Actualizar el estado de todos los pasajeros
+      if (driverTripsInProgress === 0) {
+        await User.update({ inTrip: false }, { where: { userId: publication.driverId } });
+      }
+
+      // Actualizar el estado de todos los pasajeros solo si no tienen otros viajes en progreso
       const passengersTrips = await Trip.findAll({
         where: {
           publicationId: trip.publicationId,
@@ -374,7 +383,16 @@ exports.completeTrip = async (req, res) => {
       });
 
       for (const passengerTrip of passengersTrips) {
-        await User.update({ inTrip: false }, { where: { userId: passengerTrip.userId } });
+        const passengerTripsInProgress = await Trip.count({
+          where: {
+            userId: passengerTrip.userId,
+            status: 'in progress',
+          }
+        });
+
+        if (passengerTripsInProgress === 0) {
+          await User.update({ inTrip: false }, { where: { userId: passengerTrip.userId } });
+        }
       }
 
       res.status(200).send({ message: "Trip completed successfully for all related trips." });
@@ -408,8 +426,21 @@ exports.completePassengerTrip = async (req, res) => {
     }
 
     // Check trip was started
-    if (trip.status !== 'in progress'){
+    if (trip.status !== 'in progress') {
       return res.status(403).send({ message: 'You cannot complete a trip that has not been started.' });
+    }
+
+    // Check for other trips in progress for the user
+    const otherTripsInProgress = await Trip.count({
+      where: {
+        userId: userId,
+        status: 'in progress',
+        tripId: { [Op.ne]: tripId },
+      },
+    });
+
+    if (otherTripsInProgress > 0) {
+      return res.status(403).send({ message: 'Cannot complete the trip as you have another trip in progress.' });
     }
 
     // Update status and arrivalTime
